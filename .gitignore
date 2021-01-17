@@ -2,3 +2,6 @@
 .idea/
 python/
 __pycache__/
+
+# special files
+*.todo
