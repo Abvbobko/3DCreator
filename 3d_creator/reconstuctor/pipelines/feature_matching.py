@@ -29,3 +29,16 @@ class FLANNMatcher(FeatureMatcher):
                 good_matches.append(m)
 
         return good_matches
+
+
+class BFMatcher(FeatureMatcher):
+    def __init__(self):
+        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+
+    def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
+        # Match descriptors.
+        matches = self.bf.match(descriptors_img1, descriptors_img2)
+
+        # Sort them in the order of their distance.
+        matches = sorted(matches, key=lambda x: x.distance)
+        return matches
