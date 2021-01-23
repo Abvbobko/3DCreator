@@ -3,6 +3,10 @@ import cv2
 import numpy as np
 
 
+# есть knnMatch, а есть просто match
+# узнать, в чем разница
+#
+
 class FeatureMatcher(ABC):
     @abstractmethod
     def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
@@ -33,12 +37,16 @@ class FLANNMatcher(FeatureMatcher):
 
 class BFMatcher(FeatureMatcher):
     def __init__(self):
-        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+        self.bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=False)
 
     def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
         # Match descriptors.
-        matches = self.bf.match(descriptors_img1, descriptors_img2)
+        matches = self.bf.knnMatch(descriptors_img1, descriptors_img2, k=2)
 
-        # Sort them in the order of their distance.
-        matches = sorted(matches, key=lambda x: x.distance)
-        return matches
+        # Apply ratio test
+        good = []
+        for m, n in matches:
+            if m.distance < 0.75 * n.distance:
+                good.append(m)
+
+        return good
