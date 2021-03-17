@@ -22,7 +22,7 @@ class PointForFMatrix:
             img2 = cv2.circle(img2, tuple(pt2), 5, color, -1)
         return img1, img2
 
-    def verify(self, matches, img1, img2, key_points_img1, key_points_img2):
+    def verify(self, matches, img1, img2, key_points_img1, key_points_img2, draw_points=False):
         pts1 = []  # pts - points
         pts2 = []
 
@@ -30,7 +30,7 @@ class PointForFMatrix:
             pts1.append(key_points_img1[m.queryIdx].pt)
             pts2.append(key_points_img2[m.trainIdx].pt)
 
-        pts1 = np.int32(pts1) # ToDo: why?
+        pts1 = np.int32(pts1)  # ToDo: why?
         pts2 = np.int32(pts2)
 
         F, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC)  # cv2.FM_RANSAC = 8
@@ -56,5 +56,6 @@ class PointForFMatrix:
         plt.subplot(122)
         plt.imshow(img3)
         plt.show()
+
 
 

@@ -5,3 +5,6 @@ __pycache__/
 
 # special files
 *.todo
+
+# data files and folders
+data/
