@@ -22,8 +22,8 @@ image_2_path = data_path + "2.jpg"
 image_1 = cv2.imread(image_1_path)
 image_2 = cv2.imread(image_2_path)
 
-key_points_1, descriptors_1 = sift.extract_features(image_1)
-key_points_2, descriptors_2 = sift.extract_features(image_2)
+key_points_1, descriptors_1 = sift.__extract_features(image_1)
+key_points_2, descriptors_2 = sift.__extract_features(image_2)
 
 good = matcher.match_features(key_points_1, descriptors_1, key_points_2, descriptors_2)
 

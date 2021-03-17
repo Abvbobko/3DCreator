@@ -1,3 +1,5 @@
+from creator_3d.reconstuctor.actions.action import Action
+
 from abc import ABC, abstractmethod
 import cv2
 import numpy as np
@@ -7,14 +9,15 @@ import numpy as np
 # узнать, в чем разница
 #
 
-class FeatureMatcher(ABC):
-    @abstractmethod
-    def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
-        pass
+# class FeatureMatcher(ABC):
+#     @abstractmethod
+#     def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
+#         pass
 
+class FLANNMatcher(Action):
+    def __init__(self, action_name="FLANN"):
 
-class FLANNMatcher(FeatureMatcher):
-    def __init__(self):
+        self.__action_name = action_name
         # FLANN parameters
         FLANN_INDEX_KDTREE = 1
 
@@ -34,9 +37,18 @@ class FLANNMatcher(FeatureMatcher):
 
         return good_matches
 
+    @property
+    def action_name(self):
+        return self.__action_name
 
-class BFMatcher(FeatureMatcher):
-    def __init__(self):
+    def run(self, **kwargs):
+        pass
+
+
+class BFMatcher(Action):
+    def __init__(self, action_name="BF"):
+        # todo: change action_name
+        self.__action_name = action_name
         self.bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=False)
 
     def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
@@ -50,3 +62,10 @@ class BFMatcher(FeatureMatcher):
                 good.append(m)
 
         return good
+
+    @property
+    def action_name(self):
+        return self.__action_name
+
+    def run(self, **kwargs):
+        pass
