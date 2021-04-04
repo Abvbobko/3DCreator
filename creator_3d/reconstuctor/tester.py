@@ -4,6 +4,7 @@
 from creator_3d.reconstuctor.actions import feature_extraction
 from creator_3d.reconstuctor.actions import feature_matching
 from creator_3d.reconstuctor.actions import geometric_verification
+from creator_3d.reconstuctor.actions import camera_calibration
 
 import cv2
 import matplotlib.pyplot as plt
@@ -27,8 +28,11 @@ key_points_2, descriptors_2 = sift.run(image=image_2)
 
 good = matcher.match_features(key_points_1, descriptors_1, key_points_2, descriptors_2)
 
-geometric_verifier.verify(good, image_1, image_2, key_points_1, key_points_2)
+pts1, pts2, F = geometric_verifier.verify(good, image_1, image_2, key_points_1, key_points_2)
 
+calibrator = camera_calibration.Calibrator()
+k = calibrator.run(image_1_path=image_1_path)
+print(k)
 
 # # построение карты глубины
 # gray_left = cv2.cvtColor(image_1, cv2.COLOR_BGR2GRAY)

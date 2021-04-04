@@ -43,14 +43,14 @@ class Calibrator(Action):
 
     def __calibrate(self, image_path):
         k = self.__get__camera_intrinsic_matrix_from_exif(image_path)
-        if k:
+        if k is not None:
             return k
 
         # todo: call __calibrate_with_F_matrix?
 
-
     def run(self, **kwargs):
-        pass
+        image_path = kwargs['image_1_path']
+        return self.__calibrate(image_path)
 
     @property
     def action_name(self):
