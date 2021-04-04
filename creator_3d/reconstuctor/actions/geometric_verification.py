@@ -7,9 +7,12 @@ import matplotlib.pyplot as plt
 
 class PointForFMatrix:
 
-    def drawlines(self, img1, img2, lines, pts1, pts2):
-        ''' img1 - image on which we draw the epilines for the points in img2
-            lines - corresponding epilines '''
+    @staticmethod
+    def drawlines(img1, img2, lines, pts1, pts2):
+        """img1 - image on which we draw the epilines for the points in img2
+            lines - corresponding epilines
+        """
+
         r, c = img1.shape[:2]
         # img1 = cv2.cvtColor(img1,cv2.COLOR_GRAY2BGR)
         # img2 = cv2.cvtColor(img2,cv2.COLOR_GRAY2BGR)
