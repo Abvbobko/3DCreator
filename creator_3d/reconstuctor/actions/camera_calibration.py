@@ -11,24 +11,42 @@ class Calibrator(Action):
         self.__action_name = "Calibrator"
 
     @staticmethod
-    def get_exit_params(path_to_image):
+    def get_exit_params(image):
         """Return dict with image exif metadata.
 
-        :param path_to_image: path to image on os
+        :param image: path to image on os
         :return: dict with exif parameters
         """
 
-        image = PIL.Image.open(path_to_image)
+        exif = image.getexif()
+        if not exif:
+            return None
+
         exif_data = {
             PIL.ExifTags.TAGS[k]: v
-            for k, v in image.getexif().items()
+            for k, v in exif.items()
             if k in PIL.ExifTags.TAGS
         }
         return exif_data
 
-    def __get__camera_intrinsic_matrix_from_exif(self, path_to_image):
-        exif_params = self.get_exit_params(path_to_image)
+    def __get__camera_intrinsic_matrix_from_exif(self, image_path):
+        image = PIL.Image.open(image_path)
+        exif_params = self.get_exit_params(image)
+        if not exif_params:
+            return None
+        focal_length = exif_params['FocalLength']
+        width, height = image.size
+        k = np.array([[focal_length*width, 0,                   width/2],
+                      [0,                  focal_length*height, height/2],
+                      [0,                  0,                   1]])
+        return k
 
+    def __calibrate(self, image_path):
+        k = self.__get__camera_intrinsic_matrix_from_exif(image_path)
+        if k:
+            return k
+
+        # todo: call __calibrate_with_F_matrix?
 
 
     def run(self, **kwargs):
