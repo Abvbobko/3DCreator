@@ -36,21 +36,26 @@ class Calibrator(Action):
             return None
         focal_length = exif_params['FocalLength']
         width, height = image.size
-        k = np.array([[focal_length*width, 0,                   width/2],
-                      [0,                  focal_length*height, height/2],
-                      [0,                  0,                   1]])
+        k = np.array([[float(focal_length*width), 0,                          width/2],
+                      [0,                         float(focal_length*height), height/2],
+                      [0,                         0,                          1]])
         return k
 
     def __calibrate(self, image_path):
         k = self.__get__camera_intrinsic_matrix_from_exif(image_path)
-        if k:
+        if k is not None:
             return k
-
+        image = PIL.Image.open(image_path)
+        width, height = image.size
+        k = np.array([[float(3 * width), 0, width / 2],
+                      [0, float(3 * height), height / 2],
+                      [0, 0, 1]])
+        return k
         # todo: call __calibrate_with_F_matrix?
 
-
     def run(self, **kwargs):
-        pass
+        image_path = kwargs['image_1_path']
+        return self.__calibrate(image_path)
 
     @property
     def action_name(self):
