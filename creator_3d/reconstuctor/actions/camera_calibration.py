@@ -1,7 +1,9 @@
-from creator_3d.reconstuctor.actions.action import Action
-import PIL.Image
-import PIL.ExifTags
+import logging
 import numpy as np
+import PIL.ExifTags
+import PIL.Image
+
+from creator_3d.reconstuctor.actions.action import Action
 
 # database of sensor sizes
 # https://github.com/openMVG/CameraSensorSizeDatabase
@@ -9,6 +11,9 @@ import numpy as np
 # todo: посмотреть, может можно получать image path из картинки open cv
 # todo: можно сделать калибратор с клеточками (загружаешь фотку и оно калибрует по шахматам)
 
+logger = logging.getLogger(__name__)
+
+# constants
 DEFAULT_SENSOR_WIDTH = 1
 DEFAULT_SENSOR_HEIGHT = 1
 
@@ -25,6 +30,7 @@ class Calibrator(Action):
         :return: dict with exif parameters
         """
 
+        logger.info("Getting image exif parameters;")
         exif = image.getexif()
         if not exif:
             return None
@@ -55,19 +61,23 @@ class Calibrator(Action):
         return image.size
 
     def get_intrinsic_matrix_from_exif(self, image_path):
+        logger.info("Getting camera intrinsic matrix (K) from image exif parameters (%s)",
+                    image_path)
         try:
             image = PIL.Image.open(image_path)
         except (FileNotFoundError, AttributeError):
+            logger.error("Can't read image (%s)", image_path)
             return None
 
         exif_params = self.get_exif_params(image)
         if not exif_params:
+            logger.info("Image doesn't have exif parameters (%s)", image_path)
             return None
 
         focal_length = exif_params['FocalLength']
         width, height = image.size
         # todo: тут не так умножать надо скорее всего
-
+        # todo: еще получить как то размер сенсора
         k = np.array([[float(focal_length*width), 0,                          width/2],
                       [0,                         float(focal_length*height), height/2],
                       [0,                         0,                          1]])
@@ -107,6 +117,8 @@ class Calibrator(Action):
             (np.array): intrinsic camera matrix (3x3)
         """
 
+        logger.info("Trying to get camera intrinsic matrix (K)")
+
         f_mm = kwargs.get('f_mm')
 
         im_width = kwargs.get('image_width')
@@ -119,6 +131,8 @@ class Calibrator(Action):
 
         # if no image size - get size from test image
         if (im_width and im_height) is None:
+            logger.info("There are no image width and height. Try to get them from test image (%s)",
+                        image_path)
             im_width, im_height = self.get_image_size(image_path)
 
         # if we have all parameters - create K
@@ -132,6 +146,7 @@ class Calibrator(Action):
 
         if not k:
             # todo: calibrate
+            logger.error("Couldn't get intrinsic camera matrix")
             raise Exception("Couldn't get intrinsic camera matrix")
     
         return k
@@ -164,6 +179,8 @@ class Calibrator(Action):
 
     def run(self, **kwargs):
 
+        logger.info("Start camera calibration")
+
         f_mm = kwargs.get('f_mm')
         image_width, image_height = kwargs.get('image_width'), kwargs.get('image_height')
         sensor_width, sensor_height = kwargs.get('sensor_width', 1), kwargs.get('sensor_height', 1)
@@ -180,4 +197,4 @@ class Calibrator(Action):
 
 
 if __name__ == '__main__':
-    print(Calibrator.get_image_size('test/test.jpg'))
+    print(Calibrator().get_intrinsic_matrix_from_exif(image_path='test/test.jpg'))
