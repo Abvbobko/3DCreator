@@ -71,7 +71,27 @@ def compute_essential_matrix(x, y):
     Returns:
           E - essential matrix
     """
-    A = np.array([])
+    A = np.array([x[0, :]*x[1, :],
+                  x[0, :]*y[1, :],
+                  x[0, :],
+                  y[0, :]*x[1, :],
+                  y[0, :]*y[1, :],
+                  y[0, :],
+                  x[1, :],
+                  y[1, :],
+                  np.ones(x.shape[1])]).T
+
+    U, D, V = np.linalg.svd(A)
+    E = V[:, -1]  # get last column of V
+    E_scale = E.reshape((3, 3)).T
+    return E_scale
+
+
+def postcondition(E_scale):
+    U, D, V = np.linalg.svd(E_scale)
+    E_scale = U.dot(np.diag([1, 1, 0])).dot(V.T)
+    return E_scale
+
 
 DEGREE_TO_RADIAN = pi / 180
 
@@ -116,11 +136,8 @@ p_2 = np.linalg.inv(K).dot(u2)
 p_1 = scale(p_1)
 p_2 = scale(p_2)
 
-
-
-
-
-
+E = compute_essential_matrix(p_1, p_2)
+E = postcondition(E)
 
 
 
