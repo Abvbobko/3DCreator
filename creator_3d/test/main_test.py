@@ -35,6 +35,12 @@ geometric_verifier = geometric_verification.PointForFMatrix()
 image_files_list = get_file_list(DATA_PATH, extension)
 num_of_image_files = len(image_files_list)
 
+calibrator = camera_calibration.Calibrator()
+# todo: для теста ввести тут нормальные параметры
+image_1_path = os.path.join(DATA_PATH, image_files_list[0])
+k = calibrator.run(image_1_path=image_1_path)
+print(k)
+
 # todo: передавать следующей картинке координаты текущей относительно первой
 # todo: то есть чтобы все было относительно первой картинки в итоге
 
@@ -52,7 +58,4 @@ for i in range(num_of_image_files - 1):
 
     pts1, pts2, F = geometric_verifier.verify(good, image_1, image_2, key_points_1, key_points_2)
 
-    calibrator = camera_calibration.Calibrator()
-    k = calibrator.run(image_1_path=image_1_path)
-    print(k)
 

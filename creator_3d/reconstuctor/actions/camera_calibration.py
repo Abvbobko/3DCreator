@@ -60,21 +60,52 @@ class Calibrator(Action):
             return None, None
         return image.size
 
-    def get_intrinsic_matrix_from_exif(self, image_path):
-        logger.info("Getting camera intrinsic matrix (K) from image exif parameters (%s)",
-                    image_path)
+    @staticmethod
+    def read_image(image_path):
         try:
             image = PIL.Image.open(image_path)
-        except (FileNotFoundError, AttributeError):
-            logger.error("Can't read image (%s)", image_path)
+        except FileNotFoundError:
+            logger.error("Can't find image by path.")
             return None
-
+        except AttributeError as e:
+            logger.error("%s", e)
+            # logger.error("Image doesn't contain exif parameters.")
+            return None
+        return image
+    
+    def get_camera_model_from_exif(self, image_path):
+        logger.info("Getting camera model from image exif parameters (%s)",
+                    image_path)
+        image = image_path
         exif_params = self.get_exif_params(image)
         if not exif_params:
             logger.info("Image doesn't have exif parameters (%s)", image_path)
             return None
+        camera_model = exif_params['Model']
+        return camera_model
 
-        focal_length = exif_params['FocalLength']
+    def get_parameters_from_exif(self, image, names):
+        result_dict = {}
+        exif_params = self.get_exif_params(image)
+        if not exif_params:
+            logger.info("Image doesn't have exif parameters.")
+            return result_dict
+        for name in names:
+            # todo: проверка, что содержит такой параметр exif_params
+            result_dict[name] = exif_params[name]
+        return result_dict
+
+    def get_intrinsic_matrix_from_exif(self, image_path):
+        # todo: нет смысла пока не научился получать sensor height/width
+        logger.info("Getting camera intrinsic matrix (K) from image exif parameters (%s)",
+                    image_path)
+
+        image = self.read_image(image_path)
+        if not image:
+            return None
+
+        # todo: всякие картинки на наличие словарей и тд
+        focal_length = self.get_parameters_from_exif(image, ['FocalLength'])['FocalLength']
         width, height = image.size
         # todo: тут не так умножать надо скорее всего
         # todo: еще получить как то размер сенсора
@@ -82,19 +113,6 @@ class Calibrator(Action):
                       [0,                         float(focal_length*height), height/2],
                       [0,                         0,                          1]])
         return k
-
-    # def __calibrate(self, image_path):
-    #     # todo: change all method inside
-    #     k = self.get_intrinsic_matrix_from_exif(image_path)
-    #     if k is not None:
-    #         return k
-    #     image = PIL.Image.open(image_path)
-    #     width, height = image.size
-    #     k = np.array([[float(3 * width), 0, width / 2],
-    #                   [0, float(3 * height), height / 2],
-    #                   [0, 0, 1]])
-    #     return k
-    #     # todo: call __calibrate_with_F_matrix?
 
     def get_intrinsic_matrix(self, **kwargs):
         """Combine all provided parameters and
@@ -116,6 +134,8 @@ class Calibrator(Action):
         Returns:
             (np.array): intrinsic camera matrix (3x3)
         """
+
+        # todo: тут много чего поменяется после добавления ui
 
         logger.info("Trying to get camera intrinsic matrix (K)")
 
@@ -183,7 +203,7 @@ class Calibrator(Action):
 
         f_mm = kwargs.get('f_mm')
         image_width, image_height = kwargs.get('image_width'), kwargs.get('image_height')
-        sensor_width, sensor_height = kwargs.get('sensor_width', 1), kwargs.get('sensor_height', 1)
+        sensor_width, sensor_height = kwargs.get('sensor_width'), kwargs.get('sensor_height')
         image_path = kwargs.get('image_path')
 
         return self.get_intrinsic_matrix(f_mm=f_mm,
