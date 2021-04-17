@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from math import pi, sin, cos
+from math import pi, sin, cos, sqrt
 
 
 def draw_3d_points(points):
@@ -25,6 +25,53 @@ def draw_2d_points(points):
     ax.set_ylabel('y axis')
     plt.show()
 
+
+def scale(points):
+    # scale and translate points so that centroid of the points is at the origin
+    # and the average distance of the points of the origin is equal to sqrt(2)
+
+    # xn is 2xN matrix
+    xn = points[0:2][:]  # x and y of p_1
+    N = xn.shape[1]
+
+    # this is the (x, y) centroid of the points
+    # вектор столбец (сумма всех элементов каждой строки) поделить на количество
+    t = (1 / N) * xn.sum(axis=1).reshape(2, 1)
+
+    # center the points; xnc is a 2xN matrix
+    # вычесть от каждой строки строку, где каждый элемент t (среднее значение в строке)
+    xnc = xn - t.dot(np.ones((1, N)))
+
+    # dist of each new point to 0, 0; dc is 1xN vector
+    dc = np.sqrt(
+        np.square(xnc).sum(axis=0))  # сложить x^2 + y^2 для каждой точки и найти корень (расстояние точки до 0)
+
+    d_avg = (1 / N) * dc.sum()  # average distance to the origin
+    s = 2 ** 2 / d_avg  # the scale factor, so that avg dist is sqrt(2)
+    T1 = np.array([[s, 0, -s * t[0][0]],
+                   [0, s, -s * t[1][0]],
+                   [0, 0, 1]])
+
+    points_scaled = T1.dot(points)
+    return points_scaled
+
+
+def precondition(points_1, points_2):
+    # precondition
+    p_1s = scale(points_1)
+    p_2s = scale(points_2)
+    return p_1s, p_2s
+
+
+def compute_essential_matrix(x, y):
+    """Solve
+        Ax = 0
+        where A is (x0x1 x0y1 x0 y0x1 y0y1 y0 x1 y1 1)
+        and x is (E11 E12 E13 E21 E22 E23 E31 E32 E33)^T
+    Returns:
+          E - essential matrix
+    """
+    A = np.array([])
 
 DEGREE_TO_RADIAN = pi / 180
 
@@ -59,14 +106,20 @@ u2 = np.array([[45.52720, 63.45680, 86.94470, 61.66200, 80.26530, 104.1468, 75.7
                [1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1]])
 
 
-draw_2d_points(u1)
-draw_2d_points(u2)
+# draw_2d_points(u1)
+# draw_2d_points(u2)
 
 # normalize image points
 p_1 = np.linalg.inv(K).dot(u1)
 p_2 = np.linalg.inv(K).dot(u2)
 
-# scale and translate points
+p_1 = scale(p_1)
+p_2 = scale(p_2)
+
+
+
+
+
 
 
 
