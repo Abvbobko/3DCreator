@@ -27,6 +27,90 @@ def draw_2d_points(points):
     plt.show()
 
 
+def generate_points(L=300):
+    I = np.zeros((L, L))
+    f = L
+    u0 = L / 2
+    v0 = L / 2
+    Mint = np.array([[f, 0, u0],
+                     [0, f, v0],
+                     [0, 0, 1]])
+    DEGREE_TO_RADIAN = pi / 180
+    p_m = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 2, 1, 2],
+                    [2, 1, 0, 2, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, -1, -1, -1, -2, -2, -2, 0, 0, -1, -1, -2, -2],
+                    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
+    # npts = len(p)
+    ax = 120 * DEGREE_TO_RADIAN
+    ay = 0 * DEGREE_TO_RADIAN
+    az = 60 * DEGREE_TO_RADIAN
+    Rx = np.array([[1, 0, 0],
+                   [0, cos(ax), -sin(ax)],
+                   [0, sin(ax), cos(ax)]])
+    Ry = np.array([[cos(ay), 0, sin(ay)],
+                   [0, 1, 0],
+                   [-sin(ay), 0, cos(ay)]])
+    Rz = np.array([[cos(az), -sin(az), 0],
+                   [sin(az), cos(az), 0],
+                   [0, 0, 1]])
+    R_m_c1 = Rx.dot(Ry).dot(Rz)
+    Pmorg_c1 = np.array([[0],
+                         [0],
+                         [5]])
+    M = np.concatenate((R_m_c1, Pmorg_c1), axis=1)
+
+    p1 = M.dot(p_m)
+    p1[0, :] = p1[0, :] / p1[2, :]
+    p1[1, :] = p1[1, :] / p1[2, :]
+    p1[2, :] = p1[2, :] / p1[2, :]
+    u1 = Mint.dot(p1)
+    # draw_2d_points(u)
+    # generate points 2
+    ax = 0 * DEGREE_TO_RADIAN
+    ay = -25 * DEGREE_TO_RADIAN
+    az = 0
+    Rx = np.array([[1, 0, 0],
+                   [0, cos(ax), -sin(ax)],
+                   [0, sin(ax), cos(ax)]])
+    Ry = np.array([[cos(ay), 0, sin(ay)],
+                   [0, 1, 0],
+                   [-sin(ay), 0, cos(ay)]])
+    Rz = np.array([[cos(az), -sin(az), 0],
+                   [sin(az), cos(az), 0],
+                   [0, 0, 1]])
+    R_c2_c1 = Rx.dot(Ry).dot(Rz)
+    Pc2org_c1 = np.array([[3],
+                          [0],
+                          [1]])
+
+    H_m_c1 = np.concatenate((np.concatenate((R_m_c1,
+                                             Pmorg_c1), axis=1),
+                             np.array([[0, 0, 0, 1]])), axis=0)
+
+    H_c2_c1 = np.concatenate((np.concatenate((R_c2_c1,
+                                              Pc2org_c1), axis=1),
+                              np.array([[0, 0, 0, 1]])), axis=0)
+
+    H_c1_c2 = np.linalg.inv(H_c2_c1)
+    H_m_c2 = H_c1_c2.dot(H_m_c1)
+
+    R_m_c2 = H_m_c2[0:3, 0:3]
+    Pmorg_c2 = H_m_c2[0:3, 3]
+    Pmorg_c2 = np.array([[Pmorg_c2[0]],
+                         [Pmorg_c2[1]],
+                         [Pmorg_c2[2]]])
+
+    M = np.concatenate((R_m_c2, Pmorg_c2), axis=1)
+    p2 = M.dot(p_m)
+    p2[0, :] = p2[0, :] / p2[2, :]
+    p2[1, :] = p2[1, :] / p2[2, :]
+    p2[2, :] = p2[2, :] / p2[2, :]
+    u2 = Mint.dot(p2)
+
+    # draw_2d_points(u)
+    return u1, u2
+
+
 def scale(points):
     # scale and translate points so that centroid of the points is at the origin
     # and the average distance of the points of the origin is equal to sqrt(2)
@@ -48,7 +132,8 @@ def scale(points):
     dc = np.sqrt(np.square(xnc).sum(axis=0))
 
     d_avg = (1 / N) * dc.sum()  # average distance to the origin
-    s = 2 ** 2 / d_avg  # the scale factor, so that avg dist is sqrt(2)
+    s = sqrt(2) / d_avg  # the scale factor, so that avg dist is sqrt(2)
+    print("t: ", t)
     T = np.array([[s, 0, -s * t[0][0]],
                   [0, s, -s * t[1][0]],
                   [0, 0, 1]])
@@ -76,15 +161,17 @@ def compute_essential_matrix(points_0, points_1):
     Returns:
           E - essential matrix
     """
+    print("Shape p0: ", points_0.shape)
     x0 = points_0[0, :]
     y0 = points_0[1, :]
     x1 = points_1[0, :]
     y1 = points_1[1, :]
-    A = np.array([x0*x1,
-                  x0*y1,
+
+    A = np.array([x0 * x1,
+                  x0 * y1,
                   x0,
-                  y0*x1,
-                  y0*y1,
+                  y0 * x1,
+                  y0 * y1,
                   y0,
                   x1,
                   y1,
@@ -92,6 +179,7 @@ def compute_essential_matrix(points_0, points_1):
 
     U, D, V = np.linalg.svd(A)
     E = V[:, -1]  # get last column of V
+
     E_scale = E.reshape((3, 3)).T
     return E_scale
 
@@ -107,9 +195,10 @@ def undo_scaling(E_scaled, T1, T2):
 
 
 def to_skew_matrix(v):
-    return np.array([[0,    -v[2], v[1]],
-                    [v[2],  0,     -v[0]],
-                    [-v[1], v[0],  0]])
+    return np.array([[0, -v[2], v[1]],
+                     [v[2], 0, -v[0]],
+                     [-v[1], v[0], 0]])
+
 
 def reconstruct(p1, p2, E):
     def create_camera_position_matrix(u, w, v, add_col):
@@ -123,8 +212,8 @@ def reconstruct(p1, p2, E):
 
     U, D, V = np.linalg.svd(E)
     W = np.array([[0, -1, 0],
-                  [1,  0, 0],
-                  [0,  0, 1]])
+                  [1, 0, 0],
+                  [0, 0, 1]])
 
     Hresult_c2_c1 = []
     # тут 4 возможных положения камеры, но подойдет только 1
@@ -135,8 +224,6 @@ def reconstruct(p1, p2, E):
     # make sure that rotation component is a legal rotation matrix
     # rotation matrices is right handed
     for k in range(0, 4):
-        print(f"-- {k} --")
-        print(Hresult_c2_c1[k])
         if np.linalg.det(Hresult_c2_c1[k][0:3, 0:3]) < 0:
             Hresult_c2_c1[k][0:3, 0:3] = -Hresult_c2_c1[k][0:3, 0:3]
 
@@ -155,7 +242,7 @@ def reconstruct(p1, p2, E):
 
         U, D, V = np.linalg.svd(A)
         P = V[:, -1]
-        P1est = P/P[-1]
+        P1est = P / P[-1]
 
         P2est = Hresult_c1_c2.dot(P1est)
 
@@ -170,10 +257,7 @@ def reconstruct(p1, p2, E):
     Hest_c2_c1 = np.linalg.inv(Hest_c2_c1)
     M2est = Hest_c2_c1[0:3, :]
 
-    print("Reconstructed points wrt camera 1")
     P_result = []
-    print("AAA", len(p1), len(p1[0]))
-    print("Len p1", len(p1))
     for i in range(len(p1[0])):
         p1x = to_skew_matrix(p1[:, i])
         p2x = to_skew_matrix(p2[:, i])
@@ -187,38 +271,26 @@ def reconstruct(p1, p2, E):
     return P_result
 
 
-DEGREE_TO_RADIAN = pi / 180
+
 
 # size of image in pixels
 L = 300
-I = np.zeros((L, L))
 
+
+generate_points(L)
 # define f, u0, v0
 f = L
-u0 = L/2
-v0 = L/2
-
+u0 = L / 2
+v0 = L / 2
 
 # initial intrinsic camera matrix (K)
 K = np.array([[f, 0, u0],
               [0, f, v0],
-              [0,  0, 1]])
+              [0, 0, 1]])
 
 # points of the cube
-p_m = np.array([[0, 0, 0,  0,  0,  0,  0,  0,  0, 1, 2,  1,  2,  1,  2],
-                [2, 1, 0,  2,  1,  0,  2,  1,  0, 0, 0,  0,  0,  0,  0],
-                [0, 0, 0, -1, -1, -1, -2, -2, -2, 0, 0, -1, -1, -2, -2],
-                [1, 1, 1,  1,  1,  1,  1,  1,  1, 1, 1,  1,  1,  1,  1]])
 
-
-u1 = np.array([[61.4195,  102.1798, 150.0000, 68.37680, 106.2098, 150.0000, 74.32080, 109.6134, 150.0000, 176.0870, 196.1538, 174.0000, 192.8571, 172.2222, 190.0000],
-               [124.4290, 136.1955, 150.0000, 167.2490, 181.1490, 197.2377, 203.8325, 219.1146, 236.6025, 127.4080, 110.0296, 170.7846, 150.0000, 207.7350, 184.6410],
-               [1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1]])
-
-u2 = np.array([[45.52720, 63.45680, 86.94470, 61.66200, 80.26530, 104.1468, 75.79810, 94.75070, 118.6606, 135.5451, 176.3357, 147.5739, 184.5258, 157.8633, 191.6139],
-               [126.5989, 136.7293, 150.0000, 165.9997, 180.2731, 198.5963, 200.5196, 217.7991, 239.5982, 125.7710, 105.4355, 172.3407, 150.0000, 212.1766, 188.5687],
-               [1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1,        1]])
-
+u1, u2 = generate_points()
 
 # draw_2d_points(u1)
 # draw_2d_points(u2)
@@ -228,10 +300,11 @@ p_1 = np.linalg.inv(K).dot(u1)
 p_2 = np.linalg.inv(K).dot(u2)
 
 p_1, p_2, T1, T2 = precondition(p_1, p_2)
-
 E = compute_essential_matrix(p_1, p_2)
+
 E = postcondition(E)
 E = undo_scaling(E, T1, T2)
+# ---------------------------------------------
 print(E)
 
 # reconstruction part
@@ -239,14 +312,10 @@ p = reconstruct(p_1, p_2, E)
 
 draw_3d_points(np.array(p).T)
 
-
 a = np.array([[16, 8, 8], [16, 16, 16]])
 b = np.array([4, 4, 4])
 c = np.array([[0, 0, 0, 0]])
 
-
-
-# todo: попробовать дальше SfM и если будет плохо то прочекать весь алгоритм поиска Е
 # todo: E не сходится - перепроверить все расчеты и числа!!!!!!!!
 
 # todo: потом можно попробовать юзать это
@@ -256,4 +325,3 @@ c = np.array([[0, 0, 0, 0]])
 #       0 -1       0
 # -0.3615  0 -3.1415
 #       0  3       0
-
