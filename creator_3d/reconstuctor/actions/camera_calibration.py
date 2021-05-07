@@ -164,7 +164,7 @@ class Calibrator(Action):
             # if we don't have some parameters - try to get K from test image
             k = self.get_intrinsic_matrix_from_exif(image_path)
 
-        if not k:
+        if k is None:
             # todo: calibrate
             logger.error("Couldn't get intrinsic camera matrix")
             raise Exception("Couldn't get intrinsic camera matrix")

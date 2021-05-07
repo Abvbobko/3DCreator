@@ -4,13 +4,20 @@ import cv2
 import numpy as np
 from glob import glob
 from os.path import join
-import random
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from creator_3d.reconstuctor.actions import camera_calibration
 
+import creator_3d.test.intrinsic_parameters as intrinsic_params
+
+import pyvista as pv
+
+# current best version
+
 
 # -----------------------------------------------------------------------------
-
 
 class SFMSolver(object):
     """
@@ -23,7 +30,7 @@ class SFMSolver(object):
     def __init__(self, img_pattern, intrinsic, output_dir, downscale=1):
         """
         img_pattern: regex pattern used by glob to read the files
-        instrinsic:
+        intrinsic: camera intrinsic matrix
         """
         self.img_pattern = img_pattern
         self.K_orig = self.intrinsic_orig = intrinsic.copy()
@@ -238,7 +245,7 @@ class SFMSolver(object):
 
         return R, trans
 
-    def triangulate(self, p1, p2, R, trans, mask):
+    def triangulate(self, p1, p2, R, t, R_t_0, R_t_1, mask):
         """
         p1,p2: Points in the two images which correspond to each other
         R, trans: Rotation and translation matrix.
@@ -251,35 +258,48 @@ class SFMSolver(object):
         Hint: triangulatePoints
         """
         #Creating 3x4 matrices for the two cameras by aligning world coordinates with first camera and stacking the R, T vectors for the second camera
-        Rt1 = np.hstack((np.eye(3), np.zeros((3, 1))))
-        Rt2 = np.hstack((R, trans))
+        # Rt1 = np.hstack((R_global, t_global))  # np.hstack((np.eye(3), np.zeros((3, 1))))
+        R_t_1[:3, :3] = np.matmul(R_t_0[:3, :3], R)  # np.matmul(R, R_t_0[:3, :3])
+        R_t_1[:3, 3] = R_t_0[:3, 3] + np.matmul(R_t_0[:3, :3], t.ravel())
 
-        #Creating Projection Matrices by multiplying with intrinsic matrix
-        M1 = np.dot(self.intrinsic, Rt1)
-        M2 = np.dot(self.intrinsic, Rt2)
+        # R_2 = R_global.dot(R)
+        # t_2 = R_global.dot(t) + t_global
+        # Rt2 = np.hstack((R_2, t_2)) # np.hstack((R_start.dot(R), t_start + t))
+        # Creating Projection Matrices by multiplying with intrinsic matrix
+        M1 = np.dot(self.intrinsic, R_t_0)
+        M2 = np.dot(self.intrinsic, R_t_1)
 
         print("\nProjection Matrix:\n")
         print(M2)
 
-        #Applying mask to the points to filter the outlier points and get inlier points
+        # Applying mask to the points to filter the outlier points and get inlier points
         p1_masked = p1[mask.ravel() == 1]
         p2_masked = p2[mask.ravel() == 1]
 
-        #Converting image coordinates to normalized coordinates
+        # Converting image coordinates to normalized coordinates
         p1_norm = cv2.undistortPoints(p1_masked.reshape(-1, 1, 2), self.intrinsic, None)
         p2_norm = cv2.undistortPoints(p2_masked.reshape(-1, 1, 2), self.intrinsic, None)
 
-        #Triangulating points
+        # Triangulating points
         point_4d = cv2.triangulatePoints(M1, M2, np.squeeze(p1_norm).T, np.squeeze(p2_norm).T)
 
-        #Converting homogeneous coordinates to regular coordinates
-        point_3d = (point_4d / np.tile(point_4d[-1,:], (4, 1)))[:3,:].T
+        # Converting homogeneous coordinates to regular coordinates
+        point_3d = (point_4d / np.tile(point_4d[-1, :], (4, 1)))[:3, :].T
 
         np.set_printoptions(threshold=sys.maxsize)
-        print("\nPoint positions (first 100):")
-        print(point_3d[:100])
+        print("\nPoint positions (first 10):")
+        print(point_3d[:10])
         print("\n")
         return point_3d
+
+    def mesh(self, point_cloud):
+        cloud = pv.PolyData(point_cloud)
+        cloud.plot()
+
+        volume = cloud.delaunay_3d(alpha=1.)
+        shell = volume.extract_geometry()
+        shell.plot()
+
 
     def run(self):
 
@@ -287,33 +307,52 @@ class SFMSolver(object):
 
         # pair processing
 
+
+        point_3d_global = [] # np.array([[1, 1, 1]])
+
         # step 1 and 2: detect and match feature
-        p1, p2, matches_good, kp1, kp2 = self.detect_and_match_feature(
-            self.imgs[0], self.imgs[1])
+        R_t_0 = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]])
+        R_t_1 = np.empty((3, 4))
+        camera_coor = [np.array([1, 1, 1])]
+        for i in range(len(self.imgs)-1):
+            print(f"CURRENT: {i} - {i+1}")
+            p1, p2, matches_good, kp1, kp2 = self.detect_and_match_feature(
+                self.imgs[i], self.imgs[i+1])
 
-        self.visualize_matches(
-            self.imgs[0], self.imgs[1], kp1, kp2, matches_good,
-            save_path=join(self.output_dir, 'sift_match.png'))
+            # self.visualize_matches(
+            #     self.imgs[i], self.imgs[i+1], kp1, kp2, matches_good,
+            #     save_path=join(self.output_dir, 'sift_match.png'))
 
-        # step 3: compute essential matrix
-        E, mask = self.compute_essential(p1, p2)
+            # step 3: compute essential matrix
+            E, mask = self.compute_essential(p1, p2)
 
-        self.visualize_matches(
-            self.imgs[0], self.imgs[1], kp1, kp2, matches_good, mask=mask,
-            save_path=join(self.output_dir, 'inlier_match.png'))
+            # self.visualize_matches(
+            #     self.imgs[0], self.imgs[1], kp1, kp2, matches_good, mask=mask,
+            #     save_path=join(self.output_dir, 'inlier_match.png'))
 
-        self.visualize_epipolar_lines(
-            self.imgs[0], self.imgs[1], p1, p2, E,
-            save_path=join(self.output_dir, 'epipolar_lines.png'))
+            # self.visualize_epipolar_lines(
+            #     self.imgs[0], self.imgs[1], p1, p2, E,
+            #     save_path=join(self.output_dir, 'epipolar_lines.png'))
 
-        # step 4: recover pose
-        R, trans = self.compute_pose(p1, p2, E)
+            # step 4: recover pose
+            R, trans = self.compute_pose(p1, p2, E)
+            # step 5: triangulation
+            point_3d = self.triangulate(p1, p2, R, trans, R_t_0, R_t_1, mask)
 
-        # step 5: triangulation
-        point_3d = self.triangulate(p1, p2, R, trans, mask)
-        self.write_simple_obj(point_3d, None, filepath=join(
-            self.output_dir, 'output.obj'))
+            R_t_0 = R_t_1.copy()
+            # new_coor = camera_coor[-1].dot(R_t_0)
+            # new_coor = new_coor/new_coor[-1]
+            # camera_coor.append(new_coor[:-1])
+            point_3d_global += list(point_3d)
 
+        print(np.array(point_3d_global).shape)
+
+        self.write_simple_obj(np.array(point_3d_global),
+                              None,
+                              filepath=join(self.output_dir, 'output.obj'))
+        self.mesh(np.array(point_3d_global))
+        # print(camera_coor)
+        # self.mesh(np.array(camera_coor))
         # (optional, not scored) we can process all image pairs
         # ...
 
@@ -342,19 +381,24 @@ def intrinsic_reader(txt_file):
 
 def main():
 
-    img_pattern = "C:\\Users\\hp\\Desktop\\3DCreator\\creator_3d\\data\\rock\\img_????.jpg"  # './data/rdimage.???.ppm'
+    path_to_folders = "C:\\Users\\hp\\Desktop\\3DCreator\\creator_3d\\data"
+    folder_name = "fountain"
+    img_pattern = "????.jpg"
+    img_pattern = os.path.join(path_to_folders, folder_name, img_pattern)
 
-    calibration_image = "C:\\Users\\hp\\Desktop\\3DCreator\\creator_3d\\data\\rock\\img_0001.jpg"
+    calibration_image_name = "0001.jpg"
+    calibration_image = os.path.join(path_to_folders, folder_name, calibration_image_name)
     calibrator = camera_calibration.Calibrator()
 
-    intrinsic = calibrator.get_intrinsic_matrix(f_mm=35,
-                                                image_path=calibration_image,
-                                                sensor_width=23.6,
-                                                sensor_height=15.8)  # intrinsic_reader('./data/intrinsics.txt')
-    output_dir = './output01'
+    intrinsic = intrinsic_params.FOUNTAIN_K
+    # intrinsic = calibrator.get_intrinsic_matrix(f_mm=4.9,
+    #                                             image_path=calibration_image,
+    #                                             sensor_width=6.08,
+    #                                             sensor_height=4.56)  # intrinsic_reader('./data/intrinsics.txt')
+    output_dir = './tmp'
     safe_mkdir(output_dir)
 
-    sfm_solver = SFMSolver(img_pattern, intrinsic, output_dir, downscale=2)
+    sfm_solver = SFMSolver(img_pattern, intrinsic, output_dir, downscale=1)
     sfm_solver.run()
 
 

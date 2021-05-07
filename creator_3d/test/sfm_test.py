@@ -161,12 +161,10 @@ def compute_essential_matrix(points_0, points_1):
     Returns:
           E - essential matrix
     """
-    print("Shape p0: ", points_0.shape)
     x0 = points_0[0, :]
     y0 = points_0[1, :]
     x1 = points_1[0, :]
     y1 = points_1[1, :]
-
     A = np.array([x0 * x1,
                   x0 * y1,
                   x0,
@@ -179,7 +177,6 @@ def compute_essential_matrix(points_0, points_1):
 
     U, D, V = np.linalg.svd(A)
     E = V[:, -1]  # get last column of V
-
     E_scale = E.reshape((3, 3)).T
     return E_scale
 
