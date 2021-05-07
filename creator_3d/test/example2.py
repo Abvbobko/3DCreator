@@ -2,7 +2,7 @@ import cv2 as cv
 import os
 import numpy as np
 
-from creator_3d.reconstuctor.actions import camera_calibration
+from creator_3d.reconstuctor import camera_calibration
 
 from glob import glob
 

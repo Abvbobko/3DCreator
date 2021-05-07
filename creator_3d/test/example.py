@@ -5,10 +5,7 @@ import numpy as np
 from glob import glob
 from os.path import join
 
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
-from creator_3d.reconstuctor.actions import camera_calibration
+from creator_3d.reconstuctor import camera_calibration
 
 import creator_3d.test.intrinsic_parameters as intrinsic_params
 

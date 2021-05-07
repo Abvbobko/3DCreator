@@ -7,11 +7,9 @@ import os
 from creator_3d.reconstuctor.actions import feature_extraction
 from creator_3d.reconstuctor.actions import feature_matching
 from creator_3d.reconstuctor.actions import geometric_verification
-from creator_3d.reconstuctor.actions import camera_calibration
+from creator_3d.reconstuctor import camera_calibration
 
 import cv2
-import matplotlib.pyplot as plt
-import numpy as np
 
 
 def get_file_list(data_path, ext, num_of_files=-1):

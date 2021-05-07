@@ -1,4 +1,4 @@
-from creator_3d.reconstuctor.actions import camera_calibration
+from creator_3d.reconstuctor import camera_calibration
 import numpy as np
 import os
 
