@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QApplication
 from creator_3d.window.main_window import MainWindow
-import sys
+
 
 if __name__ == '__main__':
 
