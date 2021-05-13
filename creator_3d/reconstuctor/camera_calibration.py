@@ -176,11 +176,11 @@ class Calibrator(Action):
         """Return intrinsic camera matrix (K) by parameters
 
         K is
-            | au 0  u0 |
-            | 0  av v0 |
+            | fx 0  u0 |
+            | 0  fy v0 |
             | 0  0  1  |,
 
-            where au = f/(sensor width), av = f/(sensor height)
+            where fx = width*f/(sensor width), fy = height*f/(sensor height)
                   u0, v0 is central point of the image frame (x and y, usually center of image).
 
         Args:
@@ -193,9 +193,11 @@ class Calibrator(Action):
             (np.array): intrinsic camera matrix (3x3)
         """
 
-        return np.array([[float(f_mm/sensor_width), 0,                         image_width/2],
-                         [0,                        float(f_mm/sensor_height), image_height/2],
-                         [0,                        0,                         1]])
+        fx = float(image_width*f_mm/sensor_width)
+        fy = float(image_height*f_mm/sensor_height)
+        return np.array([[fx, 0,  image_width/2],
+                         [0,  fy, image_height/2],
+                         [0,  0,  1]])
 
     def run(self, **kwargs):
 
