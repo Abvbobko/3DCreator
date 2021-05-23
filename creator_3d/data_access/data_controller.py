@@ -5,6 +5,7 @@
 
 import os
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -43,16 +44,16 @@ class DataController:
             os.mkdir(file_dir)
 
     @staticmethod
-    def write_simple_obj(mesh_v, mesh_f, filepath, verbose=False):
-        # todo: change
-        """
-        Saves 3d points which can be read in meshlab
-        """
-        with open(filepath, 'w') as fp:
+    def write_simple_obj(mesh_v, mesh_f, file_path):
+        # создание файла
+        with open(file_path, 'w') as fp:
+            # проходим по всем вершинам
             for v in mesh_v:
+                # записываем координаты точки в файл
                 fp.write('v %f %f %f\n' % (v[0], v[1], v[2]))
+            # если доступны полигоны
             if mesh_f is not None:
-                for f in mesh_f + 1:  # Faces are 1-based, not 0-based in obj files
+                # проходим по всем полигонам
+                for f in mesh_f + 1:
+                    # сохраняем полигон в файл
                     fp.write('f %d %d %d\n' % (f[0], f[1], f[2]))
-        if verbose:
-            print('mesh saved to: ', filepath)

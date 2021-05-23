@@ -35,3 +35,23 @@ KERMIT_K = np.array([[182.363977486, 0, 640/2],
 #                                            image_path=rock_head_image,
 #                                            sensor_width=5.33,
 #                                            sensor_height=4)
+
+# 1/2.9" (~ 4.96 x 3.72 mm)
+banana_folder_name = 'banana'
+banana_image_name = '1.jpg'
+banana_image_path = os.path.join(path_to_data, banana_folder_name, banana_image_name)
+
+HUAWEI_P20_LITE_K = calibrator.get_intrinsic_matrix(f_mm=30,
+                                                    image_path=banana_image_path,
+                                                    sensor_width=4.96,
+                                                    sensor_height=3.72)
+
+
+table_folder_name = 'ferrari/air'
+table_image_name = 'IMAG0371.jpg'
+table_image_path = os.path.join(path_to_data, table_folder_name, table_image_name)
+
+MOBIUS = calibrator.get_intrinsic_matrix(f_mm=2.5,
+                                         image_path=table_image_path,
+                                         sensor_width=5.07,
+                                         sensor_height=3.38)

@@ -51,17 +51,29 @@ class BFMatcher(Action):
         self.__action_name = action_name
         self.bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=False)
 
-    def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
-        # Match descriptors.
-        matches = self.bf.knnMatch(descriptors_img1, descriptors_img2, k=2)
+    # def match_features(self, key_points_img1, descriptors_img1, key_points_img2, descriptors_img2):
+    #     # Match descriptors.
+    #     matches = self.bf.knnMatch(descriptors_img1, descriptors_img2, k=2)
+    #
+    #     # Apply ratio test
+    #     good = []
+    #     for m, n in matches:
+    #         if m.distance < 0.75 * n.distance:
+    #             good.append(m)
+    #
+    #     return good
 
-        # Apply ratio test
-        good = []
-        for m, n in matches:
-            if m.distance < 0.75 * n.distance:
-                good.append(m)
+    def match_features(self, query, train):
 
-        return good
+        bf = cv2.BFMatcher(cv2.NORM_L2)
+        knn_matches = bf.knnMatch(query, train, k=2)
+        matches = []
+        for m, n in knn_matches:
+            # todo: вынести в параметры
+            if m.distance < const.MRT * n.distance:
+                matches.append(m)
+
+        return np.array(matches)
 
     @property
     def action_name(self):

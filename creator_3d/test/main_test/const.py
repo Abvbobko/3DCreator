@@ -6,9 +6,9 @@ dir_name = "rock_small"
 image_dir = os.path.join(image_dir_path, dir_name)
 MRT = 0.7
 
-K = intrinsic.ROCK_K
+# K = intrinsic.MOBIUS
 
-# K = intrinsic.ROCK_K
+K = intrinsic.ROCK_K
 # K = np.array([
 #         [2362.12, 0, 720],
 #         [0, 2362.12,  578],

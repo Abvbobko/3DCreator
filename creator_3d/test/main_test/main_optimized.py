@@ -9,7 +9,30 @@ from scipy.optimize import least_squares
 import pyvista as pv
 
 
+def extract_features_for_one(image_path, sift):
+    image = cv2.imread(image_path)
+
+    if image is None:
+        return None, None, None
+    key_points, descriptor = sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), None)
+
+    if len(key_points) <= 10:
+        return None, None, None
+    
+    colors = np.zeros((len(key_points), 3))
+    for i, key_point in enumerate(key_points):
+        p = key_point.pt
+        colors[i] = image[int(p[1])][int(p[0])]
+
+    return key_points, descriptor, colors  
+
+
+def match_all_features_for_one(prev_descr, descr):    
+    return np.array(match_features(prev_descr, descr))
+
+
 def extract_features(image_names):
+    # todo: old
     sift = cv2.SIFT_create(0, 3, 0.04, 10)
     key_points_for_all = []
     descriptor_for_all = []
@@ -19,7 +42,6 @@ def extract_features(image_names):
 
         if image is None:
             continue
-
         key_points, descriptor = sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), None)
 
         if len(key_points) <= 10:
@@ -57,7 +79,7 @@ def match_all_features(descriptor_for_all):
 def find_transform(K, p1, p2):
     focal_length = 0.5 * (K[0, 0] + K[1, 1])
     principle_point = (K[0, 2], K[1, 2])
-    E, mask = cv2.findEssentialMat(p1, p2, focal_length, principle_point, cv2.RANSAC, 0.999, 1.0)  # it's params !!!
+    E, mask = cv2.findEssentialMat(p1, p2, focal_length, principle_point, cv2.RANSAC, 0.999, 1.0)
     cameraMatrix = np.array([[focal_length, 0, principle_point[0]], [0, focal_length, principle_point[1]], [0, 0, 1]])
     pass_count, R, T, mask = cv2.recoverPose(E, p1, p2, cameraMatrix, mask)
 
@@ -197,7 +219,8 @@ def get_3dpos(pos, ob, r, t, K):
     return res.x
 
 
-def get_3dpos_v1(pos, ob, r, t, K):
+def \
+        get_3dpos_v1(pos, ob, r, t, K):
     p, J = cv2.projectPoints(pos.reshape(1, 1, 3), r, t, K, np.array([]))
     p = p.reshape(2)
     e = ob - p
@@ -250,7 +273,6 @@ def fig(structure, colors):
 
 
 def fig_v1(structure):
-    print(structure.shape)
     mlab.points3d(structure[:, 0], structure[:, 1], structure[:, 2], mode='point', name='dinosaur')
     mlab.show()
 
@@ -270,6 +292,75 @@ def mesh(point_cloud):
     volume = cloud.delaunay_3d(alpha=1.)
     shell = volume.extract_geometry()
     shell.plot()
+
+
+def main_optimized():
+    sift = cv2.SIFT_create(0, 3, 0.04, 10)
+    image_dir = const.image_dir
+    img_names = os.listdir(image_dir)
+    # img_names = sorted(img_names)
+
+    for i in range(len(img_names)):
+        img_names[i] = os.path.join(image_dir, img_names[i])
+    K = const.K
+
+    structure, correspond_struct_idx, colors, rotations, motions = [], [], [], [], []
+    prev_key_points, prev_descriptor, prev_colors = extract_features_for_one(img_names[0], sift)
+    curr_key_points, curr_descriptor, curr_colors = extract_features_for_one(img_names[1], sift)
+
+    for i in range(1, len(img_names)):
+        print(f"{i-1} - {i}")
+        print("extract features")
+        key_points, descriptor, colors = extract_features_for_one(img_names[i], sift)                
+        print("match features")
+        matches_for_all = match_all_features_for_one(prev_descriptor, descriptor)
+        print("reconstruct")
+        object_points, image_points = get_objpoints_and_imgpoints(matches_for_all[i], correspond_struct_idx[i],
+                                                                  structure, key_points_for_all[i + 1])
+
+
+    for i in range(1, len(matches_for_all)):
+        print(f"{i} - {i+1}")
+        object_points, image_points = get_objpoints_and_imgpoints(matches_for_all[i], correspond_struct_idx[i],
+                                                                  structure, key_points_for_all[i + 1])
+        # In python's opencv, the first parameter length of the solvePnPRansac
+        # function needs to be greater than 7,otherwise an error will be reported
+        # Here do a repeat fill operation for the set of points less than 7,
+        # that is, fill 7 with the first point in the set of points
+        if len(image_points) < 7:
+            while len(image_points) < 7:
+                object_points = np.append(object_points, [object_points[0]], axis=0)
+                image_points = np.append(image_points, [image_points[0]], axis=0)
+
+        _, r, T, _ = cv2.solvePnPRansac(object_points, image_points, K, np.array([]))
+        R, _ = cv2.Rodrigues(r)
+        rotations.append(R)
+        motions.append(T)
+        p1, p2 = get_matched_points(key_points_for_all[i], key_points_for_all[i + 1], matches_for_all[i])
+        c1, c2 = get_matched_colors(colors_for_all[i], colors_for_all[i + 1], matches_for_all[i])
+        next_structure = reconstruct(K, rotations[i], motions[i], R, T, p1, p2)
+
+        correspond_struct_idx[i], correspond_struct_idx[i + 1], structure, colors = fusion_structure(
+            matches_for_all[i],
+            correspond_struct_idx[i],
+            correspond_struct_idx[i + 1],
+            structure, next_structure, colors, c1
+        )
+    structure = bundle_adjustment(rotations, motions, K, correspond_struct_idx, key_points_for_all, structure)
+    i = 0
+    # Due to the bundle_adjustment structure, some empty points are
+    # generated(the actual representative means they were removed）
+    # Remove these empty dots here
+    while i < len(structure):
+        if math.isnan(structure[i][0]):
+            structure = np.delete(structure, i, 0)
+            colors = np.delete(colors, i, 0)
+            i -= 1
+        i += 1
+
+    print(len(structure))
+    print(len(motions))    
+    fig_v1(structure)    
 
 
 def main():

@@ -18,7 +18,7 @@ DEFAULT_SENSOR_WIDTH = 1
 DEFAULT_SENSOR_HEIGHT = 1
 
 
-class Calibrator(Action):
+class Calibrator:
     def __init__(self):
         self.__action_name = "Calibrator"
 

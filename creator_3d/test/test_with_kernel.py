@@ -4,9 +4,7 @@
 
 import os
 
-from creator_3d.reconstuctor.actions import feature_extraction
-from creator_3d.reconstuctor.actions import feature_matching
-from creator_3d.reconstuctor.actions import geometric_verification
+from creator_3d.reconstuctor.actions.steps import geometric_verification, feature_matching, feature_extraction
 from creator_3d.reconstuctor import camera_calibration
 
 import cv2
