@@ -3,21 +3,15 @@ import cv2
 import numpy as np
 
 
-# по идее можно удалить
-# class FeatureExtractor(Action, ABC):
-#     @abstractmethod
-#     def extract_features(self, image):
-#         pass
-
-
 class SIFT(Action):
-    def __init__(self,
-                 action_name="SIFT",
-                 n_features=0,
-                 n_octave_layers=3,
-                 contrast_threshold=0.04,
-                 edge_threshold=10,
-                 sigma=1.6):
+    def __init__(self, action_name="SIFT", **kwargs):
+        super(SIFT, self).__init__(action_name, **kwargs)
+        # n_features=0,
+        # n_octave_layers=3,
+        # contrast_threshold=0.04,
+        # edge_threshold=10,
+        # sigma=1.6):
+
 
         self.sift = cv2.SIFT_create(n_features,
                                     n_octave_layers,
