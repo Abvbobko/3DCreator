@@ -4,6 +4,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# todo: add steps? and then наследоваться от шага
+
 class Action(ABC):
     def __init__(self, action_name='', default_params_dict=None, **kwargs):
         self._action_name = action_name
@@ -62,10 +64,18 @@ class Action(ABC):
         """Reset all parameters to default."""
         pass
 
+    # @abstractmethod
+    # def run(self, **kwargs):
+    #     """Start action method and
+    #     return result dict that contains parameters for the next step.
+    #     """
+    #     pass
+
+
+class Extract(Action, ABC):
     @abstractmethod
-    def run(self, **kwargs):
-        """Start action method and
-        return result dict that contains parameters for the next step.
-        """
+    def detect_and_compute(self, image, mask):
+        """Find key points and descriptors"""
         pass
+
 

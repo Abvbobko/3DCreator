@@ -1,10 +1,12 @@
-from creator_3d.reconstuctor.actions.action import Action
+from creator_3d.reconstuctor.actions.action import Action, Extract
 from creator_3d.reconstuctor.constants import algorithm_default_params
 import cv2
 import numpy as np
 
 
-class SIFT(Action):
+# todo: add all docstrings?
+
+class SIFT(Extract):
     def __init__(self, action_name="SIFT", default_params_dict=None, **kwargs):
         """
         Args:
@@ -39,11 +41,15 @@ class SIFT(Action):
             new_params = self.__default_parameters.copy()
         self.__params = new_params
 
-    def run(self, **kwargs):
-        image = kwargs['image']
-        # todo: создавать словарь для следующего шага
-        result_temp = self.__extract_features(image)
-        return result_temp
+    def detect_and_compute(self, image, mask):
+        """Find key points and descriptors"""
+        return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), None)
+    #
+    # def run(self, **kwargs):
+    #     image = kwargs['image']
+    #     # todo: создавать словарь для следующего шага
+    #     result_temp = self.__extract_features(image)
+    #     return result_temp
 
 
 class SURF(Action):

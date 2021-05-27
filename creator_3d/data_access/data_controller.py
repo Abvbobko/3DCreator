@@ -45,15 +45,9 @@ class DataController:
 
     @staticmethod
     def write_simple_obj(mesh_v, mesh_f, file_path):
-        # создание файла
         with open(file_path, 'w') as fp:
-            # проходим по всем вершинам
             for v in mesh_v:
-                # записываем координаты точки в файл
                 fp.write('v %f %f %f\n' % (v[0], v[1], v[2]))
-            # если доступны полигоны
             if mesh_f is not None:
-                # проходим по всем полигонам
                 for f in mesh_f + 1:
-                    # сохраняем полигон в файл
                     fp.write('f %d %d %d\n' % (f[0], f[1], f[2]))
