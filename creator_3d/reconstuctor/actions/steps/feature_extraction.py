@@ -18,17 +18,8 @@ class SIFT(Extract):
             default_params_dict = algorithm_default_params.SIFT_DEFAULT_PARAMS.copy()
         super(SIFT, self).__init__(action_name, default_params_dict, **kwargs)
 
-        params = self.__generate_sift_params_dict(**kwargs)
+        params = self.__generate_params_dict(**kwargs)
         self.sift = self.__get_sift_with_params(**params)
-
-    def __generate_sift_params_dict(self, **kwargs):
-        """Get params for algorithm from kwargs"""
-        params = self.get_param_names()
-        result_param_dict = {}
-        for param in params:
-            if param in kwargs:
-                result_param_dict[param] = kwargs.get(param)
-        return result_param_dict
 
     @staticmethod
     def __get_sift_with_params(params_dict):
@@ -41,15 +32,9 @@ class SIFT(Extract):
             new_params = self.__default_parameters.copy()
         self.__params = new_params
 
-    def detect_and_compute(self, image, mask):
+    def detect_and_compute(self, image, mask=None):
         """Find key points and descriptors"""
-        return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), None)
-    #
-    # def run(self, **kwargs):
-    #     image = kwargs['image']
-    #     # todo: создавать словарь для следующего шага
-    #     result_temp = self.__extract_features(image)
-    #     return result_temp
+        return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
 
 class SURF(Action):

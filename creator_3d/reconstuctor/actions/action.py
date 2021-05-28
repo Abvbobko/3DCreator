@@ -4,13 +4,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-# todo: add steps? and then наследоваться от шага
-
 class Action(ABC):
-    def __init__(self, action_name='', default_params_dict=None, **kwargs):
+    def __init__(self, action_name='', default_params_dict=None, step_name=None, **kwargs):
         self._action_name = action_name
         self.__params = kwargs
         self.__default_parameters = default_params_dict
+        self.step_name = step_name
 
     @property
     def action_name(self):
@@ -64,18 +63,39 @@ class Action(ABC):
         """Reset all parameters to default."""
         pass
 
-    # @abstractmethod
-    # def run(self, **kwargs):
-    #     """Start action method and
-    #     return result dict that contains parameters for the next step.
-    #     """
-    #     pass
+    def __generate_params_dict(self, **kwargs):
+        """Get params for algorithm from kwargs"""
+        params = self.get_param_names()
+        result_param_dict = {}
+        for param in params:
+            if param in kwargs:
+                result_param_dict[param] = kwargs.get(param)
+        return result_param_dict
 
 
 class Extract(Action, ABC):
     @abstractmethod
-    def detect_and_compute(self, image, mask):
+    def detect_and_compute(self, image, mask=None):
         """Find key points and descriptors"""
         pass
 
 
+class Match(Action, ABC):
+    @abstractmethod
+    def match_features(self, descriptors_img1, descriptors_img2):
+        """Match features of two images."""
+        pass
+
+
+class Reconstruct(Action, ABC):
+    @abstractmethod
+    def reconstruct(self, **params):
+        """Reconstruct 3D points."""
+        pass
+
+
+class BundleAdjustment(Action, ABC):
+    @abstractmethod
+    def bundle_adjustment(self, **params):
+        """Combine points to points cloud."""
+        pass

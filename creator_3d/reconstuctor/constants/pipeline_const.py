@@ -1,0 +1,6 @@
+MIN_NUMBER_OF_KEY_POINTS = 10
+MRT = 0.7
+
+x = 0.5
+y = 1
+

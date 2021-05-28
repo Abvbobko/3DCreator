@@ -3,13 +3,8 @@ import numpy as np
 import PIL.ExifTags
 import PIL.Image
 
-from creator_3d.reconstuctor.actions.action import Action
-
 # database of sensor sizes
 # https://github.com/openMVG/CameraSensorSizeDatabase
-
-# todo: посмотреть, может можно получать image path из картинки open cv
-# todo: можно сделать калибратор с клеточками (загружаешь фотку и оно калибрует по шахматам)
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +91,6 @@ class Calibrator:
         return result_dict
 
     def get_intrinsic_matrix_from_exif(self, image_path):
-        # todo: нет смысла пока не научился получать sensor height/width
         logger.info("Getting camera intrinsic matrix (K) from image exif parameters (%s)",
                     image_path)
 
@@ -107,8 +101,7 @@ class Calibrator:
         # todo: всякие картинки на наличие словарей и тд
         focal_length = self.get_parameters_from_exif(image, ['FocalLength'])['FocalLength']
         width, height = image.size
-        # todo: тут не так умножать надо скорее всего
-        # todo: еще получить как то размер сенсора
+
         k = np.array([[float(focal_length*width), 0,                          width/2],
                       [0,                         float(focal_length*height), height/2],
                       [0,                         0,                          1]])
@@ -212,10 +205,6 @@ class Calibrator:
                                          image_width=image_width, image_height=image_height,
                                          sensor_width=sensor_width, sensor_height=sensor_height,
                                          image_path=image_path)
-
-    @property
-    def action_name(self):
-        return self.__action_name
 
 
 if __name__ == '__main__':
