@@ -9,7 +9,7 @@ import PIL.Image
 logger = logging.getLogger(__name__)
 
 # constants
-DEFAULT_SENSOR_WIDTH = 1 # todo: delete
+DEFAULT_SENSOR_WIDTH = 1  # todo: delete
 DEFAULT_SENSOR_HEIGHT = 1
 
 
@@ -19,6 +19,9 @@ class Camera:
 
     def get_k(self):
         return self.K
+
+    def set_k(self, intrinsic_matrix):
+        self.K = intrinsic_matrix
 
 
 class Calibrator:

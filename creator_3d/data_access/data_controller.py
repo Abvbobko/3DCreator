@@ -1,8 +1,4 @@
 # todo: module docstring
-# todo: load image
-    # cv
-    # exif
-
 # todo: get sensor params from file using camera model
 
 import os
@@ -79,3 +75,7 @@ class DataController:
             logger.error("%s", e)
             return None
         return image
+
+    def get_sensor_size_from_csv(self, camera_model):
+        """Tuple (sensor width, sensor height) in mm"""
+        pass

@@ -23,13 +23,17 @@ class Step:
 
     @staticmethod
     def get_algorithm_params(algorithm: Action):
-        return algorithm.get_params()
+        if algorithm:
+            return algorithm.get_params()
+        return None
 
     def get_current_algorithm_params(self):
         return self.get_algorithm_params(self.current_algorithm)
 
     def get_current_algorithm_default_params(self):
-        return self.get_algorithm_params(self.current_algorithm)
+        if self.current_algorithm:
+            return self.get_algorithm_params(self.current_algorithm)
+        return None
 
     def get_current_algorithm(self):
         return self.current_algorithm

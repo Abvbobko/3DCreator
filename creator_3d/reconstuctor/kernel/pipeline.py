@@ -3,7 +3,8 @@ import numpy as np
 import math
 from creator_3d.reconstuctor.constants import pipeline_const
 import logging
-from creator_3d.reconstuctor.actions.action import Action
+from creator_3d.reconstuctor.actions.action import Extract, Match, Reconstruct, BundleAdjustment
+from creator_3d.reconstuctor.camera_calibration import Camera
 
 logger = logging.getLogger(__name__)
 
@@ -11,16 +12,15 @@ logger = logging.getLogger(__name__)
 class Pipeline:
     def __init__(self,
                  camera,
-                 feature_extractor: Action,
-                 feature_matcher: Action,
-                 reconstructor: Action,
-                 bundle_adjuster: Action):
+                 feature_extractor: Extract,
+                 feature_matcher: Match,
+                 reconstructor: Reconstruct,
+                 bundle_adjuster: BundleAdjustment):
         self.camera = camera
         self.extractor = feature_extractor
         self.matcher = feature_matcher
         self.reconstructor = reconstructor
         self.bundle_adjuster = bundle_adjuster
-        # todo: may be set K in init?
 
     def __extract_features(self, image_names):
         """Extract all key points and descriptors from image list.
@@ -93,11 +93,13 @@ class Pipeline:
 
         return np.array(p1_copy)
 
-    def __init_structure(self, K, key_points_for_all, matches_for_all):
+    def __init_structure(self, key_points_for_all, matches_for_all):
         p1, p2 = self.__get_matched_points(key_points_for_all[0], key_points_for_all[1], matches_for_all[0])
 
-        if self.__find_transform(K, p1, p2):
-            R, T, mask = self.__find_transform(K, p1, p2)
+        K = self.camera.get_k()
+        transform = self.__find_transform(K, p1, p2)
+        if transform:
+            R, T, mask = transform
         else:
             R, T, mask = np.array([]), np.array([]), np.array([])
 
@@ -155,14 +157,13 @@ class Pipeline:
             struct_indices[query_idx] = next_struct_indices[train_idx] = len(structure) - 1
         return struct_indices, next_struct_indices, structure
 
-    def run(self, image_names, K):
+    def run(self, image_names):
         # todo: think how to implement image loading
         key_points, descriptor = self.__extract_features(image_names)
         matches = self.__match_features(descriptor)
         logger.info("Reconstruction")
         print("0 - 1")
-        structure, correspond_struct_idx, rotations, motions = self.__init_structure(K,
-                                                                                     key_points,
+        structure, correspond_struct_idx, rotations, motions = self.__init_structure(key_points,
                                                                                      matches)
 
         for i in range(1, len(matches)):
@@ -177,14 +178,14 @@ class Pipeline:
                     object_points = np.append(object_points, [object_points[0]], axis=0)
                     image_points = np.append(image_points, [image_points[0]], axis=0)
 
-            _, r, T, _ = cv2.solvePnPRansac(object_points, image_points, K, np.array([]))
+            _, r, T, _ = cv2.solvePnPRansac(object_points, image_points, self.camera.get_k(), np.array([]))
             R, _ = cv2.Rodrigues(r)
             rotations.append(R)
             motions.append(T)
             p1, p2 = self.__get_matched_points(key_points[i],
                                                key_points[i + 1],
                                                matches[i])
-            next_structure = self.reconstructor.reconstruct(K=K,
+            next_structure = self.reconstructor.reconstruct(K=self.camera.get_k(),
                                                             R1=rotations[i],
                                                             T1=motions[i],
                                                             R2=R,
@@ -201,7 +202,7 @@ class Pipeline:
 
         structure = self.bundle_adjuster.bundle_adjustment(rotations=rotations,
                                                            motions=motions,
-                                                           K=K,
+                                                           K=self.camera.get_k(),
                                                            correspond_struct_idx=correspond_struct_idx,
                                                            key_points=key_points,
                                                            structure=structure)
@@ -213,20 +214,3 @@ class Pipeline:
             i += 1
 
         return structure
-
-        # todo: return and save to file
-        # fig_v1(structure)
-
-    # def __init__(self, steps: List[Action]):
-    #     self.steps = steps
-    #
-    # def run(self, **kwargs):
-    #     # start_params - dict with initial params
-    #     # todo: можно вынести это в отдельный класс параметров, формировать его и получать нужное
-    #     params = kwargs['start_params']
-    #     for step in self.steps:
-    #         step.run(**params)
-    #         params = step.get_result_dict()
-    #
-    # def create_pipeline(self, steps: List[Action]):
-    #     self.steps = steps
