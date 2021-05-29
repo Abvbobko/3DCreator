@@ -5,16 +5,11 @@ from creator_3d.reconstuctor.constants import algorithm_default_params
 
 
 class Reconstructor(Reconstruct):
-    def __init__(self, default_params_dict=None, **kwargs):
-        if not default_params_dict:
-            default_params_dict = algorithm_default_params.RECONSTRUCT_DEFAULT_PARAMS.copy()
-        super(Reconstructor, self).__init__(default_params_dict, **kwargs)
 
-        # params = self.__generate_params_dict(**kwargs)
-        # self.flann = self.__get_flann_with_params(**params)
+    __default_params = algorithm_default_params.RECONSTRUCT_DEFAULT_PARAMS
 
-    def reset_params(self):
-        pass
+    def __init__(self, **kwargs):
+        super(Reconstructor, self).__init__(**kwargs)
 
     @staticmethod
     def __get_projection(K, R, T):

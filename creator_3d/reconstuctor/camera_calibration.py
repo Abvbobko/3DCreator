@@ -9,13 +9,19 @@ import PIL.Image
 logger = logging.getLogger(__name__)
 
 # constants
-DEFAULT_SENSOR_WIDTH = 1
+DEFAULT_SENSOR_WIDTH = 1 # todo: delete
 DEFAULT_SENSOR_HEIGHT = 1
 
 
+class Camera:
+    def __init__(self, intrinsic_matrix: np.array):
+        self.K = intrinsic_matrix
+
+    def get_k(self):
+        return self.K
+
+
 class Calibrator:
-    def __init__(self):
-        self.__action_name = "Calibrator"
 
     @staticmethod
     def get_exif_params(image):
@@ -38,63 +44,38 @@ class Calibrator:
         return exif_data
 
     @staticmethod
-    def get_image_size(image_path):
+    def get_image_size(image: PIL.Image):
         """Return image size in pixels
 
         Args:
-            image_path (str): path to image
+            image (PIL.Image): image object
 
         Returns:
             (tuple(int, int)): image width and height in pixels.
-            if image does not exist - return (None, None).
         """
 
-        try:
-            image = PIL.Image.open(image_path)
-        except (FileNotFoundError, AttributeError):
-            return None, None
         return image.size
 
-    @staticmethod
-    def read_image(image_path):
-        try:
-            image = PIL.Image.open(image_path)
-        except FileNotFoundError:
-            logger.error("Can't find image by path.")
-            return None
-        except AttributeError as e:
-            logger.error("%s", e)
-            # logger.error("Image doesn't contain exif parameters.")
-            return None
-        return image
-    
-    def get_camera_model_from_exif(self, image_path):
-        logger.info("Getting camera model from image exif parameters (%s)",
-                    image_path)
-        image = image_path
+    def get_camera_model_from_exif(self, image):
         exif_params = self.get_exif_params(image)
         if not exif_params:
-            logger.info("Image doesn't have exif parameters (%s)", image_path)
             return None
         camera_model = exif_params['Model']
         return camera_model
 
-    def get_parameters_from_exif(self, image, names):
+    def get_parameters_from_exif(self, image, param_exif_names):
         result_dict = {}
         exif_params = self.get_exif_params(image)
         if not exif_params:
             logger.info("Image doesn't have exif parameters.")
             return result_dict
-        for name in names:
-            # todo: проверка, что содержит такой параметр exif_params
+        for name in param_exif_names:
+            # todo: проверка, что содержит такой параметр exif_params\
+            # todo: тут можно переделать, чтобы устанавливались [мое значение]: [exif name]
             result_dict[name] = exif_params[name]
         return result_dict
 
-    def get_intrinsic_matrix_from_exif(self, image_path):
-        logger.info("Getting camera intrinsic matrix (K) from image exif parameters (%s)",
-                    image_path)
-
-        image = self.read_image(image_path)
+    def get_intrinsic_matrix_from_exif(self, image):
         if not image:
             return None
 
@@ -102,6 +83,7 @@ class Calibrator:
         focal_length = self.get_parameters_from_exif(image, ['FocalLength'])['FocalLength']
         width, height = image.size
 
+        # todo: ЗАМЕНИТЬ МЕТОД
         k = np.array([[float(focal_length*width), 0,                          width/2],
                       [0,                         float(focal_length*height), height/2],
                       [0,                         0,                          1]])
@@ -116,7 +98,7 @@ class Calibrator:
 
         Args:
             **kwargs:
-                image_path (str): path to test image to get
+                image_path (str): path to image with params
                     intrinsic camera parameters (optional)
                 f_mm (float): focal camera length in mm (optional)
                 image_width (int): width of image in pixels (optional)
@@ -128,8 +110,7 @@ class Calibrator:
             (np.array): intrinsic camera matrix (3x3)
         """
 
-        # todo: тут много чего поменяется после добавления ui
-
+        # TODO: ПОСМОТРЕТЬ И ИЗМЕНИТЬ МЕТОД
         logger.info("Trying to get camera intrinsic matrix (K)")
 
         f_mm = kwargs.get('f_mm')
@@ -142,7 +123,7 @@ class Calibrator:
 
         k = None
 
-        # if no image size - get size from test image
+        # if no image size - get size from image
         if (im_width and im_height) is None:
             logger.info("There are no image width and height. Try to get them from test image (%s)",
                         image_path)
@@ -154,7 +135,7 @@ class Calibrator:
                                              image_width=im_width, image_height=im_height,
                                              sensor_width=sensor_width, sensor_height=sensor_height)
         elif image_path:
-            # if we don't have some parameters - try to get K from test image
+            # if we don't have some parameters - try to get K from image
             k = self.get_intrinsic_matrix_from_exif(image_path)
 
         if k is None:
@@ -205,7 +186,3 @@ class Calibrator:
                                          image_width=image_width, image_height=image_height,
                                          sensor_width=sensor_width, sensor_height=sensor_height,
                                          image_path=image_path)
-
-
-if __name__ == '__main__':
-    print(Calibrator().get_intrinsic_matrix_from_exif(image_path='test/test.jpg'))

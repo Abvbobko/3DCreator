@@ -3,9 +3,13 @@
     # cv
     # exif
 
+# todo: get sensor params from file using camera model
+
 import os
 import logging
 import numpy as np
+import PIL.Image
+import cv2
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +55,27 @@ class DataController:
             if mesh_f is not None:
                 for f in mesh_f + 1:
                     fp.write('f %d %d %d\n' % (f[0], f[1], f[2]))
+
+    @staticmethod
+    def read_pil_image(image_path):
+        try:
+            image = PIL.Image.open(image_path)
+        except FileNotFoundError:
+            logger.error("Can't find image by path.")
+            return None
+        except AttributeError as e:
+            logger.error("%s", e)
+            return None
+        return image
+
+    @staticmethod
+    def read_cv2_image(image_path):
+        try:
+            image = cv2.imread(image_path)
+        except FileNotFoundError:
+            logger.error("Can't find image by path.")
+            return None
+        except AttributeError as e:
+            logger.error("%s", e)
+            return None
+        return image

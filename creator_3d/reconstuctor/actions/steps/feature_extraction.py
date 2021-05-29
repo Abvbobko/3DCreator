@@ -6,15 +6,17 @@ import cv2
 # todo: add all docstrings?
 
 class SIFT(actions.Extract):
-    def __init__(self, default_params_dict=None, **kwargs):
+
+    __default_params = algorithm_default_params.SIFT_DEFAULT_PARAMS
+
+    def __init__(self, **kwargs):
         """
         Args:
             default_params_dict: dict with default parameters value
             **kwargs: list of current algorithm parameters
         """
-        if not default_params_dict:
-            default_params_dict = algorithm_default_params.SIFT_DEFAULT_PARAMS.copy()
-        super(SIFT, self).__init__(default_params_dict, **kwargs)
+
+        super(SIFT, self).__init__(**kwargs)
 
         params = self.__generate_params_dict(**kwargs)
         self.sift = self.__get_sift_with_params(**params)
@@ -22,13 +24,6 @@ class SIFT(actions.Extract):
     @staticmethod
     def __get_sift_with_params(params_dict):
         return cv2.SIFT_create(**params_dict)
-
-    def reset_params(self):
-        """Set params to default values"""
-        new_params = None
-        if self.__default_parameters:
-            new_params = self.__default_parameters.copy()
-        self.__params = new_params
 
     def detect_and_compute(self, image, mask=None):
         """Find key points and descriptors"""

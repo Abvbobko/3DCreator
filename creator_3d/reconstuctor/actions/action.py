@@ -5,26 +5,24 @@ logger = logging.getLogger(__name__)
 
 
 class Action(ABC):
-    def __init__(self, default_params_dict=None, step_name=None, **kwargs):
-        self._action_name = action_name
+
+    __default_params = {}
+
+    def __init__(self, **kwargs):
         self.__params = kwargs
-        self.__default_parameters = default_params_dict
-        self.step_name = step_name
 
     @property
     def get_default_params(self):
         """Get default action parameters."""
-        if self.__default_parameters:
-            return self.__default_parameters.copy()
-        return None
+        return self.__default_params.copy()
 
     def get_default_param_by_name(self, param_name):
         """Get default param value by name"""
-        return self.__default_parameters.get(param_name)
+        return self.__default_params.get(param_name)
 
     def get_param_names(self):
         """Get list of all parameter names."""
-        return list(self.__default_parameters.keys())
+        return list(self.__default_params.keys())
 
     def get_params(self):
         """Get all parameters dict."""
@@ -51,10 +49,9 @@ class Action(ABC):
 
         self.__params.update(param_dict)
 
-    @abstractmethod
     def reset_params(self):
-        """Reset all parameters to default."""
-        pass
+        """Set params to default values"""
+        self.__params = self.__default_params.copy()
 
     def __generate_params_dict(self, **kwargs):
         """Get params for algorithm from kwargs"""

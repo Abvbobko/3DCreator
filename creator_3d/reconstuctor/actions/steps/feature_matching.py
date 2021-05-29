@@ -10,14 +10,11 @@ from creator_3d.reconstuctor.constants import pipeline_const
 
 
 class BFMatcher(Match):
-    def reset_params(self):
-        pass
 
-    def __init__(self, default_params_dict=None, **kwargs):
-        if not default_params_dict:
-            default_params_dict = algorithm_default_params.BF_DEFAULT_PARAMS.copy()
-        # todo: сюда надо передавать не дефолт
-        super(BFMatcher, self).__init__(default_params_dict, **kwargs)
+    __default_params = algorithm_default_params.BF_DEFAULT_PARAMS
+
+    def __init__(self, **kwargs):
+        super(BFMatcher, self).__init__(**kwargs)
 
         params = self.__generate_params_dict(**kwargs)
         self.bf = self.__get_bf_with_params(**params)

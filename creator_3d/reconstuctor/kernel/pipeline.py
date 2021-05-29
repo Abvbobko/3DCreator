@@ -3,18 +3,23 @@ import numpy as np
 import math
 from creator_3d.reconstuctor.constants import pipeline_const
 import logging
+from creator_3d.reconstuctor.actions.action import Action
 
 logger = logging.getLogger(__name__)
 
 
 class Pipeline:
-    def __init__(self, camera, feature_extractor):
+    def __init__(self,
+                 camera,
+                 feature_extractor: Action,
+                 feature_matcher: Action,
+                 reconstructor: Action,
+                 bundle_adjuster: Action):
         self.camera = camera
-        self.feature_extractor = feature_extractor
-        self.extractor = None
-        self.matcher = None
-        self.reconstructor = None
-        self.bundle_adjuster = None
+        self.extractor = feature_extractor
+        self.matcher = feature_matcher
+        self.reconstructor = reconstructor
+        self.bundle_adjuster = bundle_adjuster
         # todo: may be set K in init?
 
     def __extract_features(self, image_names):
