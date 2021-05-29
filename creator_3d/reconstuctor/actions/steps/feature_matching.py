@@ -9,21 +9,21 @@ from creator_3d.reconstuctor.constants import pipeline_const
 # todo: есть knnMatch, а есть просто match узнать, в чем разница
 
 
-class FLANNMatcher(Match):
+class BFMatcher(Match):
     def reset_params(self):
         pass
 
-    def __init__(self, action_name="FLANN", default_params_dict=None, **kwargs):
+    def __init__(self, default_params_dict=None, **kwargs):
         if not default_params_dict:
-            default_params_dict = algorithm_default_params.FLANN_DEFAULT_PARAMS.copy()
-        super(FLANNMatcher, self).__init__(action_name, default_params_dict, **kwargs)
+            default_params_dict = algorithm_default_params.BF_DEFAULT_PARAMS.copy()
+        # todo: сюда надо передавать не дефолт
+        super(BFMatcher, self).__init__(default_params_dict, **kwargs)
 
         params = self.__generate_params_dict(**kwargs)
-        self.flann = self.__get_flann_with_params(**params)
+        self.bf = self.__get_bf_with_params(**params)
 
     def match_features(self, query, train):
-        bf = cv2.BFMatcher(cv2.NORM_L2)
-        knn_matches = bf.knnMatch(query, train, k=2)
+        knn_matches = self.bf.knnMatch(query, train, k=2)  # todo: вынести в параметры
         matches = []
         for m, n in knn_matches:
             if m.distance < pipeline_const.MRT * n.distance:
@@ -32,12 +32,41 @@ class FLANNMatcher(Match):
         return np.array(matches)
 
     @staticmethod
-    def __get_flann_with_params(params_dict):
-        index_params = dict(algorithm=params_dict.get("index_kdtree"),
-                            trees=params_dict.get("trees"))
+    def __get_bf_with_params(params_dict):
+        return cv2.BFMatcher(**params_dict)
 
-        search_params = dict(params_dict.get("check"))
-        return cv2.FlannBasedMatcher(index_params, search_params)
+    def __str__(self):
+        return "BF"
+
+# class FLANNMatcher(Match):
+#     def reset_params(self):
+#         pass
+#
+#     def __init__(self, action_name="FLANN", default_params_dict=None, **kwargs):
+#         if not default_params_dict:
+#             default_params_dict = algorithm_default_params.FLANN_DEFAULT_PARAMS.copy()
+#         super(FLANNMatcher, self).__init__(action_name, default_params_dict, **kwargs)
+#
+#         params = self.__generate_params_dict(**kwargs)
+#         self.flann = self.__get_flann_with_params(**params)
+#
+#     def match_features(self, query, train):
+#         bf = cv2.BFMatcher(cv2.NORM_L2) # todo: убрать метчер
+#         knn_matches = bf.knnMatch(query, train, k=2) # todo: вынести в параметры
+#         matches = []
+#         for m, n in knn_matches:
+#             if m.distance < pipeline_const.MRT * n.distance:
+#                 matches.append(m)
+#
+#         return np.array(matches)
+#
+#     @staticmethod
+#     def __get_flann_with_params(params_dict):
+#         index_params = dict(algorithm=params_dict.get("index_kdtree"),
+#                             trees=params_dict.get("trees"))
+#
+#         search_params = dict(params_dict.get("check"))
+#         return cv2.FlannBasedMatcher(index_params, search_params)
 
 # class BFMatcher(Action):
 #     def __init__(self, action_name="BF"):

@@ -5,18 +5,11 @@ logger = logging.getLogger(__name__)
 
 
 class Action(ABC):
-    def __init__(self, action_name='', default_params_dict=None, step_name=None, **kwargs):
+    def __init__(self, default_params_dict=None, step_name=None, **kwargs):
         self._action_name = action_name
         self.__params = kwargs
         self.__default_parameters = default_params_dict
         self.step_name = step_name
-
-    @property
-    def action_name(self):
-        """Human readable name of action (algorithm) like SIFT"""
-        if not self._action_name:
-            logger.error("Action does not have action_name.")
-        return self._action_name
 
     @property
     def get_default_params(self):

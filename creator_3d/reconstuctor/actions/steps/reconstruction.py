@@ -5,10 +5,10 @@ from creator_3d.reconstuctor.constants import algorithm_default_params
 
 
 class Reconstructor(Reconstruct):
-    def __init__(self, action_name="Reconstruct", default_params_dict=None, **kwargs):
+    def __init__(self, default_params_dict=None, **kwargs):
         if not default_params_dict:
             default_params_dict = algorithm_default_params.RECONSTRUCT_DEFAULT_PARAMS.copy()
-        super(Reconstructor, self).__init__(action_name, default_params_dict, **kwargs)
+        super(Reconstructor, self).__init__(default_params_dict, **kwargs)
 
         # params = self.__generate_params_dict(**kwargs)
         # self.flann = self.__get_flann_with_params(**params)
@@ -41,3 +41,6 @@ class Reconstructor(Reconstruct):
             structure.append([col[0], col[1], col[2]])
 
         return np.array(structure)
+
+    def __str__(self):
+        return "Reconstruct"

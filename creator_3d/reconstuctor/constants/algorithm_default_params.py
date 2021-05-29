@@ -1,3 +1,5 @@
+import cv2
+
 # extraction
 SIFT_DEFAULT_PARAMS = {
     "n_features": 0,
@@ -13,6 +15,13 @@ FLANN_DEFAULT_PARAMS = {
     "trees": 5,
     "checks": 50
 }
+
+# matching
+BF_DEFAULT_PARAMS = {
+    "normType": cv2.NORM_L2,
+    "crossCheck": False
+}
+
 
 # reconstruction
 RECONSTRUCT_DEFAULT_PARAMS = {}

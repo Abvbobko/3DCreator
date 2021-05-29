@@ -1,22 +1,20 @@
-from creator_3d.reconstuctor.actions.action import Action, Extract
+import creator_3d.reconstuctor.actions.action as actions
 from creator_3d.reconstuctor.constants import algorithm_default_params
 import cv2
-import numpy as np
 
 
 # todo: add all docstrings?
 
-class SIFT(Extract):
-    def __init__(self, action_name="SIFT", default_params_dict=None, **kwargs):
+class SIFT(actions.Extract):
+    def __init__(self, default_params_dict=None, **kwargs):
         """
         Args:
-            action_name: name of the algorithm
             default_params_dict: dict with default parameters value
             **kwargs: list of current algorithm parameters
         """
         if not default_params_dict:
             default_params_dict = algorithm_default_params.SIFT_DEFAULT_PARAMS.copy()
-        super(SIFT, self).__init__(action_name, default_params_dict, **kwargs)
+        super(SIFT, self).__init__(default_params_dict, **kwargs)
 
         params = self.__generate_params_dict(**kwargs)
         self.sift = self.__get_sift_with_params(**params)
@@ -36,11 +34,14 @@ class SIFT(Extract):
         """Find key points and descriptors"""
         return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
+    def __str__(self):
+        return "SIFT"
 
-class SURF(Action):
+
+class SURF(actions.Extract):
     pass
 
 
-class ORB(Action):
+class ORB(actions.Extract):
     pass
 

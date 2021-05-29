@@ -7,10 +7,10 @@ import numpy as np
 
 class BundleAdjuster(BundleAdjustment):
 
-    def __init__(self, action_name="Reconstruct", default_params_dict=None, **kwargs):
+    def __init__(self, default_params_dict=None, **kwargs):
         if not default_params_dict:
             default_params_dict = algorithm_default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.copy()
-        super(BundleAdjuster, self).__init__(action_name, default_params_dict, **kwargs)
+        super(BundleAdjuster, self).__init__(default_params_dict, **kwargs)
 
         # params = self.__generate_params_dict(**kwargs)
         # self.flann = self.__get_flann_with_params(**params)
@@ -51,3 +51,6 @@ class BundleAdjuster(BundleAdjustment):
                 structure[point3d_id] = new_point
 
         return structure
+
+    def __str__(self):
+        return "Bundle adjustment"
