@@ -6,6 +6,8 @@ import logging
 import numpy as np
 import PIL.Image
 import cv2
+import csv
+import creator_3d.data_access.constants.const as const
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +78,18 @@ class DataController:
             return None
         return image
 
-    def get_sensor_size_from_csv(self, camera_model):
+    @staticmethod
+    def get_sensor_size_from_csv(camera_model):
+        # test: test on rock image
         """Tuple (sensor width, sensor height) in mm"""
-        pass
+
+        model = camera_model.split(None, 1)[-1]
+
+        with open(const.SENSOR_DATABASE_PATH, 'r') as sensor_database_csv:
+            reader = csv.DictReader(sensor_database_csv)
+
+            for row in reader:
+                if row['CameraModel'] in [model, camera_model]:
+                    return row['SensorWidth(mm)'], row['SensorHeight(mm)']
+
+        return None, None

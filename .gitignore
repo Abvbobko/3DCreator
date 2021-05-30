@@ -10,3 +10,5 @@ __pycache__/
 data/
 
 tmp/
+
+creator_3d/data_access/sensor_database.csv
