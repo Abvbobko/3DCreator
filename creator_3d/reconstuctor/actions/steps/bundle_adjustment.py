@@ -1,5 +1,5 @@
 from creator_3d.reconstuctor.actions.action import BundleAdjustment
-from creator_3d.reconstuctor.constants import algorithm_default_params
+from creator_3d.reconstuctor.constants import algorithm_default_params as default_params
 from creator_3d.reconstuctor.constants import pipeline_const
 import cv2
 import numpy as np
@@ -7,7 +7,7 @@ import numpy as np
 
 class BundleAdjuster(BundleAdjustment):
 
-    __default_params = algorithm_default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS
+    __default_params = default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -47,4 +47,4 @@ class BundleAdjuster(BundleAdjustment):
         return structure
 
     def __str__(self):
-        return "Bundle adjustment"
+        return default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.name

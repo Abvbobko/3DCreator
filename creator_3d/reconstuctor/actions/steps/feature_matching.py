@@ -3,7 +3,7 @@ from creator_3d.reconstuctor.actions.action import Match
 from abc import ABC, abstractmethod
 import cv2
 import numpy as np
-from creator_3d.reconstuctor.constants import algorithm_default_params
+from creator_3d.reconstuctor.constants import algorithm_default_params as default_params
 from creator_3d.reconstuctor.constants import pipeline_const
 
 # todo: есть knnMatch, а есть просто match узнать, в чем разница
@@ -11,7 +11,7 @@ from creator_3d.reconstuctor.constants import pipeline_const
 
 class BFMatcher(Match):
 
-    __default_params = algorithm_default_params.BF_DEFAULT_PARAMS
+    __default_params = default_params.BF_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -33,12 +33,12 @@ class BFMatcher(Match):
         return cv2.BFMatcher(**params_dict)
 
     def __str__(self):
-        return "BF"
+        return default_params.BF_DEFAULT_PARAMS.name
 
 
 class FLANNMatcher(Match):
 
-    __default_params = algorithm_default_params.FLANN_DEFAULT_PARAMS
+    __default_params = default_params.FLANN_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         super(FLANNMatcher, self).__init__(**kwargs)
@@ -60,7 +60,7 @@ class FLANNMatcher(Match):
         return cv2.FlannBasedMatcher(**params_dict)
 
     def __str__(self):
-        return "FLANN"
+        return default_params.FLANN_DEFAULT_PARAMS.name
 
 
 # class FLANNMatcher(Match):
@@ -69,7 +69,7 @@ class FLANNMatcher(Match):
 #
 #     def __init__(self, action_name="FLANN", default_params_dict=None, **kwargs):
 #         if not default_params_dict:
-#             default_params_dict = algorithm_default_params.FLANN_DEFAULT_PARAMS.copy()
+#             default_params_dict = default_params.FLANN_DEFAULT_PARAMS.copy()
 #         super(FLANNMatcher, self).__init__(action_name, default_params_dict, **kwargs)
 #
 #         params = self.__generate_params_dict(**kwargs)

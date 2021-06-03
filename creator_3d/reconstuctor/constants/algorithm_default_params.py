@@ -52,4 +52,3 @@ RECONSTRUCT_DEFAULT_PARAMS = AlgorithmDefaultParams("Reconstruct", {})
 
 # bundle adjustment
 BUNDLE_ADJUSTMENT_DEFAULT_PARAMS = AlgorithmDefaultParams("Bundle adjust", {})
-

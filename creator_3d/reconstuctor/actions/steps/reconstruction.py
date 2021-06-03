@@ -1,12 +1,12 @@
 import numpy as np
 import cv2
 from creator_3d.reconstuctor.actions.action import Reconstruct
-from creator_3d.reconstuctor.constants import algorithm_default_params
+from creator_3d.reconstuctor.constants import algorithm_default_params as default_params
 
 
 class Reconstructor(Reconstruct):
 
-    __default_params = algorithm_default_params.RECONSTRUCT_DEFAULT_PARAMS
+    __default_params = default_params.RECONSTRUCT_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -38,4 +38,4 @@ class Reconstructor(Reconstruct):
         return np.array(structure)
 
     def __str__(self):
-        return "Reconstruct"
+        return default_params.RECONSTRUCT_DEFAULT_PARAMS.name

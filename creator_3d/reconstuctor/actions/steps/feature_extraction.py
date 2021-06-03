@@ -1,11 +1,12 @@
 import creator_3d.reconstuctor.actions.action as actions
-from creator_3d.reconstuctor.constants import algorithm_default_params
+from creator_3d.reconstuctor.constants import algorithm_default_params as default_params
 import cv2
 
 
 class SIFT(actions.Extract):
 
-    __default_params = algorithm_default_params.SIFT_DEFAULT_PARAMS
+    # todo: think about default params and generalize logic?
+    __default_params = default_params.SIFT_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         """
@@ -28,11 +29,11 @@ class SIFT(actions.Extract):
         return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
     def __str__(self):
-        return "SIFT"
+        return default_params.SIFT_DEFAULT_PARAMS.name
 
 
 class SURF(actions.Extract):
-    __default_params = algorithm_default_params.SURF_DEFAULT_PARAMS
+    __default_params = default_params.SURF_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         """
@@ -56,11 +57,11 @@ class SURF(actions.Extract):
         return self.surf.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
     def __str__(self):
-        return "SURF"
+        return default_params.SURF_DEFAULT_PARAMS.name
 
 
 class ORB(actions.Extract):
-    __default_params = algorithm_default_params.SURF_DEFAULT_PARAMS
+    __default_params = default_params.ORB_DEFAULT_PARAMS.params
 
     def __init__(self, **kwargs):
         """
@@ -83,6 +84,6 @@ class ORB(actions.Extract):
         return self.orb.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
     def __str__(self):
-        return "ORB"
+        return default_params.ORB_DEFAULT_PARAMS.name
 
 
