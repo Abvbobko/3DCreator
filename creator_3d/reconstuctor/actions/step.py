@@ -5,38 +5,58 @@ from creator_3d.reconstuctor.actions.action import Action
 
 
 class Step:
-    def __init__(self, step_module, step_name):
+    def __init__(self, step_module, step_name, default_algorithm_name):
         self.module = step_module
         self.name = step_name
-        self.current_algorithm = None
+        self.step_algorithms = self.get_step_algorithms()
+
+        if self.is_algorithm_belongs_to_step(default_algorithm_name):
+            self.default_algorithm = default_algorithm_name
+        elif self.step_algorithms:
+            self.default_algorithm = self.get_step_algorithms()[0]
+        else:
+            self.default_algorithm = None
+
+    def is_algorithm_belongs_to_step(self, algorithm_name: str):
+        """Check if algorithm belongs to step algorithms or not"""
+        for algorithm in self.step_algorithms:
+            if algorithm_name == str(algorithm):
+                return True
+        return False
+
+    def get_algorithm_class_by_name(self, algorithm_name: str):
+        for algorithm in self.step_algorithms:
+            if algorithm_name == str(algorithm):
+                return algorithm
+        return None
+
+    def get_algorithm_object(self, algorithm_name: str, **params):
+        # todo: think maybe we should delete ** everywhere
+        algorithm_class = self.get_algorithm_class_by_name(algorithm_name)
+        if algorithm_class:
+            return algorithm_class(**params)
+        return None
 
     def get_step_algorithms(self):
+        """Get all algorithms of step"""
         algorithms = inspect.getmembers(sys.modules[self.module.__name__], inspect.isclass)
         return [class_name for class_name, _ in algorithms]
 
+    def get_default_step_algorithm_name(self):
+        """Get default algorithm name of the step"""
+        return self.default_algorithm
+
     @staticmethod
     def get_algorithm_default_params(algorithm: Action):
-        return algorithm.get_default_params
+        """Get default params of the algorithm
 
-    def set_current_algorithm(self, algorithm_class, **params):
-        self.current_algorithm = algorithm_class(**params)
+        Args:
+            algorithm (Action): algorithm class
+        Returns:
+            (dict): dict of algorithm params
+        """
 
-    @staticmethod
-    def get_algorithm_params(algorithm: Action):
-        if algorithm:
-            return algorithm.get_params()
-        return None
-
-    def get_current_algorithm_params(self):
-        return self.get_algorithm_params(self.current_algorithm)
-
-    def get_current_algorithm_default_params(self):
-        if self.current_algorithm:
-            return self.get_algorithm_params(self.current_algorithm)
-        return None
-
-    def get_current_algorithm(self):
-        return self.current_algorithm
+        return algorithm.get_default_params()
 
     def __str__(self):
         return self.name
