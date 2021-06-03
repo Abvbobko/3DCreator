@@ -8,9 +8,6 @@ class Action(ABC):
 
     __default_params = {}
 
-    def __init__(self, **kwargs):
-        self.__params = kwargs
-
     @property
     def get_default_params(self):
         """Get default action parameters."""
@@ -24,35 +21,6 @@ class Action(ABC):
         """Get list of all parameter names."""
         return list(self.__default_params.keys())
 
-    def get_params(self):
-        """Get all parameters dict."""
-        if self.__params:
-            return self.__params.copy()
-        return None
-
-    def get_param_value_by_name(self, param_name, default=None):
-        """Get param value by name.
-        If there is no parameter with name -> return None."""
-        return self.__params.get(param_name, default)
-
-    def set_param_by_name(self, param_name, value):
-        """Set new value to parameter."""
-        self.__params[param_name] = value
-
-    def set_new_params(self, param_dict):
-        """Set new values to params.
-
-        Args:
-            param_dict (dict): dict where key is param name
-            and value is new param value.
-        """
-
-        self.__params.update(param_dict)
-
-    def reset_params(self):
-        """Set params to default values"""
-        self.__params = self.__default_params.copy()
-
     def __generate_params_dict(self, **kwargs):
         """Get params for algorithm from kwargs"""
         params = self.get_param_names()
@@ -61,6 +29,10 @@ class Action(ABC):
             if param in kwargs:
                 result_param_dict[param] = kwargs.get(param)
         return result_param_dict
+
+    @abstractmethod
+    def __str__(self):
+        pass
 
 
 class Extract(Action, ABC):
@@ -86,6 +58,6 @@ class Reconstruct(Action, ABC):
 
 class BundleAdjustment(Action, ABC):
     @abstractmethod
-    def bundle_adjustment(self, **params):
+    def adjust_bundle(self, **params):
         """Combine points to points cloud."""
         pass
