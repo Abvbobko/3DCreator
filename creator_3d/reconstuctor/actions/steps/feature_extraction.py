@@ -3,8 +3,6 @@ from creator_3d.reconstuctor.constants import algorithm_default_params
 import cv2
 
 
-# todo: add all docstrings?
-
 class SIFT(actions.Extract):
 
     __default_params = algorithm_default_params.SIFT_DEFAULT_PARAMS
@@ -16,8 +14,8 @@ class SIFT(actions.Extract):
             **kwargs: list of current algorithm parameters
         """
 
-        super(SIFT, self).__init__(**kwargs)
-
+        # test: check super() with abstract init
+        super().__init__(**kwargs)
         params = self.__generate_params_dict(**kwargs)
         self.sift = self.__get_sift_with_params(**params)
 
@@ -34,9 +32,57 @@ class SIFT(actions.Extract):
 
 
 class SURF(actions.Extract):
-    pass
+    __default_params = algorithm_default_params.SURF_DEFAULT_PARAMS
+
+    def __init__(self, **kwargs):
+        """
+        Args:
+            default_params_dict: dict with default parameters value
+            **kwargs: list of current algorithm parameters
+        """
+
+        super().__init__(**kwargs)
+
+        params = self.__generate_params_dict(**kwargs)
+        self.surf = self.__get_surf_object(**params)
+
+    @staticmethod
+    def __get_surf_object(params_dict):
+        # todo: check
+        return cv2.SURF_create(**params_dict)
+
+    def detect_and_compute(self, image, mask=None):
+        """Find key points and descriptors"""
+        return self.surf.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
+
+    def __str__(self):
+        return "SURF"
 
 
 class ORB(actions.Extract):
-    pass
+    __default_params = algorithm_default_params.SURF_DEFAULT_PARAMS
+
+    def __init__(self, **kwargs):
+        """
+        Args:
+            default_params_dict: dict with default parameters value
+            **kwargs: list of current algorithm parameters
+        """
+
+        super().__init__(**kwargs)
+
+        params = self.__generate_params_dict(**kwargs)
+        self.orb = self.__get_orb_object(**params)
+
+    @staticmethod
+    def __get_orb_object(params_dict):
+        return cv2.ORB_create(**params_dict)
+
+    def detect_and_compute(self, image, mask=None):
+        """Find key points and descriptors"""
+        return self.orb.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
+
+    def __str__(self):
+        return "ORB"
+
 

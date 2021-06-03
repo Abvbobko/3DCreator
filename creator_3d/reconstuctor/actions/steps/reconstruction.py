@@ -9,7 +9,7 @@ class Reconstructor(Reconstruct):
     __default_params = algorithm_default_params.RECONSTRUCT_DEFAULT_PARAMS
 
     def __init__(self, **kwargs):
-        super(Reconstructor, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @staticmethod
     def __get_projection(K, R, T):

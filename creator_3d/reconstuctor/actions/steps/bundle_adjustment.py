@@ -10,7 +10,7 @@ class BundleAdjuster(BundleAdjustment):
     __default_params = algorithm_default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS
 
     def __init__(self, **kwargs):
-        super(BundleAdjuster, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @staticmethod
     def __get_3d_pos(pos, ob, r, t, K):
@@ -21,7 +21,7 @@ class BundleAdjuster(BundleAdjustment):
             return None
         return pos
 
-    def bundle_adjustment(self, **params):
+    def adjust_bundle(self, **params):
         rotations = params.get("rotations")
         motions = params.get("motions")
         K = params.get("K")

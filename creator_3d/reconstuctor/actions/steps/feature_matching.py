@@ -14,10 +14,10 @@ class BFMatcher(Match):
     __default_params = algorithm_default_params.BF_DEFAULT_PARAMS
 
     def __init__(self, **kwargs):
-        super(BFMatcher, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
         params = self.__generate_params_dict(**kwargs)
-        self.bf = self.__get_bf_with_params(**params)
+        self.bf = self.__get_bf_object(**params)
 
     def match_features(self, query, train):
         knn_matches = self.bf.knnMatch(query, train, k=2)  # todo: вынести в параметры
@@ -29,11 +29,39 @@ class BFMatcher(Match):
         return np.array(matches)
 
     @staticmethod
-    def __get_bf_with_params(params_dict):
+    def __get_bf_object(params_dict):
         return cv2.BFMatcher(**params_dict)
 
     def __str__(self):
         return "BF"
+
+
+class FLANNMatcher(Match):
+
+    __default_params = algorithm_default_params.FLANN_DEFAULT_PARAMS
+
+    def __init__(self, **kwargs):
+        super(FLANNMatcher, self).__init__(**kwargs)
+
+        params = self.__generate_params_dict(**kwargs)
+        self.bf = self.__get_flann_object(**params)
+
+    def match_features(self, query, train):
+        knn_matches = self.bf.knnMatch(query, train, k=2)
+        matches = []
+        for m, n in knn_matches:
+            if m.distance < pipeline_const.MRT * n.distance:
+                matches.append(m)
+
+        return np.array(matches)
+
+    @staticmethod
+    def __get_flann_object(params_dict):
+        return cv2.FlannBasedMatcher(**params_dict)
+
+    def __str__(self):
+        return "FLANN"
+
 
 # class FLANNMatcher(Match):
 #     def reset_params(self):

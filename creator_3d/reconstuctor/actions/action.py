@@ -8,6 +8,10 @@ class Action(ABC):
 
     __default_params = {}
 
+    @abstractmethod
+    def __init__(self, **params):
+        pass
+
     @property
     def get_default_params(self):
         """Get default action parameters."""
