@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import (QApplication,
                              QAbstractItemView,
                              QPushButton,
                              QHeaderView,
-                             QFileDialog)
+                             QFileDialog,
+                             qApp)
 from PyQt5.QtCore import Qt
 
 import cv2
@@ -108,6 +109,8 @@ class MainWindow(QMainWindow):
         return file_paths[0]
 
     def __fill_image_table(self, image_names):
+        """Fill image table using image names."""
+
         self.image_table.clearContents()
         num_of_images = len(image_names)
         self.image_table.setRowCount(num_of_images)
@@ -117,19 +120,23 @@ class MainWindow(QMainWindow):
             order_item = QTableWidgetItem(order)
             self.image_table.setItem(i, 0, order_item)
 
-            # todo: make image name column non-editable
             # insert image name
             image_name_item = QTableWidgetItem(image_names[i])
+            image_name_item.setFlags(Qt.ItemIsEnabled)
             self.image_table.setItem(i, 1, image_name_item)
 
             # insert remove button
             remove_button_sell = QPushButton('X')
-            # todo: add row deleting method
-            # remove_button_sell.clicked.connect(self.handleButtonClicked)
+            remove_button_sell.clicked.connect(self.__remove_item_from_image_table)
             self.image_table.setCellWidget(i, 2, remove_button_sell)
 
-    def remove_item_from_image_table(self):
-        pass
+    def __remove_item_from_image_table(self):
+        """Remove row of clicked button in image table"""
+
+        button = qApp.focusWidget()
+        index = self.image_table.indexAt(button.pos())
+        if index.isValid():
+            self.image_table.removeRow(index.row())
 
     def get_next_image_number(self):
         pass
@@ -159,16 +166,6 @@ class MainWindow(QMainWindow):
     # todo: add algorithm choosing by combobox
     # todo: may be buttons add "Add images" and "Clear" instead of "Load images"
     # todo: add camera params input (f, sw, sh, get_camera_params)
-
-    # todo: QTableWidget
-    # todo: add deleting from file list
-
-    # todo: Load button
-    # todo: show open file button
-    # todo: choose files in dialog window
-    # todo: add list of images to Table
-
-    # todo: save full paths to images
 
     # todo: Process button
     # todo: process all images from list
