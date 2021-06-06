@@ -1,6 +1,12 @@
 from PyQt5 import QtGui, uic
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QTableWidgetItem, QAbstractItemView, QPushButton, \
-    QHeaderView
+from PyQt5.QtWidgets import (QApplication,
+                             QMainWindow,
+                             QMessageBox,
+                             QTableWidgetItem,
+                             QAbstractItemView,
+                             QPushButton,
+                             QHeaderView,
+                             QFileDialog)
 from PyQt5.QtCore import Qt
 
 import cv2
@@ -11,7 +17,6 @@ from creator_3d.controllers.main_controller import MainController
 
 class MainWindow(QMainWindow):
     def __init__(self, ui_path=window_const.UI_PATH):
-
         self.main_controller = MainController()
 
         super().__init__()
@@ -19,20 +24,16 @@ class MainWindow(QMainWindow):
         # init UI
         uic.loadUi(ui_path, self)
 
+        self.path_to_image_files = None
+
         # set window title
         self.setWindowTitle(window_const.WIN_TITLE)
 
+        # image loading
+        self.load_images_button.clicked.connect(self.__choose_files_and_fill_image_table)
+
         self.image_table.setColumnCount(window_const.IMAGE_TABLE.cols_count())
         self.image_table.setHorizontalHeaderLabels(window_const.IMAGE_TABLE.table_header)
-
-
-        # todo: example
-        # test_text = [[str(1), "0001.jpg", None],
-        #              [str(2), "0000.jpg", None],
-        #              [str(3), "0002.jpg", None]]
-        #
-
-        # self.image_table.setRowCount(3)
 
         # set width of column using size of text in header
         header = self.image_table.horizontalHeader()
@@ -40,22 +41,7 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
-        # for i in range(len(test_text)):
-        #     for j in range(len(test_text[i])):
-        #         if test_text[i][j]:
-        #             item = QTableWidgetItem(test_text[i][j])
-        #             self.image_table.setItem(i, j, item)
-        #         else:
-        #             btn_sell = QPushButton('X')
-        #             # btn_sell.clicked.connect(self.handleButtonClicked)
-        #             self.image_table.setCellWidget(i, j, btn_sell)
-        #
-        # # for i in range(len(test_text)):
-        # #     item = QTableWidgetItem(test_text[i])
-        # #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
-        # #     self.image_table.setItem(i, 0, item)
-        #
-        # # test for 6 chapter
+        # combobox filling example todo remove
         # self.feature_extraction_combobox.clear()
         # self.feature_extraction_combobox.addItems(['SIFT', 'SURF', 'ORB'])
         # self.feature_matching_combobox.clear()
@@ -64,7 +50,8 @@ class MainWindow(QMainWindow):
         # self.reconstruction_combobox.addItems(['Reconstructor'])
         # self.bundle_adjustment_combobox.clear()
         # self.bundle_adjustment_combobox.addItems(['Bundle adjustment'])
-        #
+
+        # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
         #          "sigma"],
         #         ["", "SIFT", str(0), str(3), str(0.04), str(10), str(1.6)],
@@ -76,7 +63,8 @@ class MainWindow(QMainWindow):
         #         ["", "Bundle adjustment", "0.5", "1", "", "", ""]]
         # self.algorithm_parameters_table.setColumnCount(len(text[0]))
         # self.algorithm_parameters_table.setRowCount(len(text))
-        # self.algorithm_parameters_table.setHorizontalHeaderLabels(['Step', 'Algorithm', 'param_1', 'param_2', 'param_3',
+        # self.algorithm_parameters_table.setHorizontalHeaderLabels(['Step', 'Algorithm', 'param_1', 'param_2',
+        #                                                            'param_3',
         #                                                            'param_4', 'param_5'])
         #
         # header = self.algorithm_parameters_table.horizontalHeader()
@@ -94,8 +82,51 @@ class MainWindow(QMainWindow):
         #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
         #
 
-    def fill_image_table(self, text_values):
-        pass
+    def __choose_files_and_fill_image_table(self):
+        image_files = self.__open_file_dialog(title=window_const.IMAGES_FOR_PROCESS_DIALOG_TITLE,
+                                              directory=window_const.IMAGES_FOR_PROCESS_DIALOG_DIR,
+                                              file_filter=window_const.IMAGES_FOR_PROCESS_DIALOG_FILE_FILTER)
+        if image_files:
+            self.path_to_image_files = os.path.dirname(image_files[0])
+            image_names = [os.path.basename(path) for path in image_files]
+            self.__fill_image_table(image_names)
+
+    def __open_file_dialog(self, title="", directory="", file_filter=None):
+        """Open file dialog and return file paths of the selected files.
+
+        Args:
+            title (str): title of the file dialog
+            directory (str): path to start dir for opening
+            file_filter (str): set of file filters
+        Returns:
+            (list[str]): list of the paths to selected files.
+        """
+
+        open_dialog = QFileDialog()
+        file_paths = open_dialog.getOpenFileNames(self, title, directory, file_filter)
+        # file_paths is tuple like (file_paths, format)
+        return file_paths[0]
+
+    def __fill_image_table(self, image_names):
+        self.image_table.clearContents()
+        num_of_images = len(image_names)
+        self.image_table.setRowCount(num_of_images)
+        for i in range(num_of_images):
+            # insert order number
+            order = str(i+1)
+            order_item = QTableWidgetItem(order)
+            self.image_table.setItem(i, 0, order_item)
+
+            # todo: make image name column non-editable
+            # insert image name
+            image_name_item = QTableWidgetItem(image_names[i])
+            self.image_table.setItem(i, 1, image_name_item)
+
+            # insert remove button
+            remove_button_sell = QPushButton('X')
+            # todo: add row deleting method
+            # remove_button_sell.clicked.connect(self.handleButtonClicked)
+            self.image_table.setCellWidget(i, 2, remove_button_sell)
 
     def remove_item_from_image_table(self):
         pass
@@ -143,6 +174,3 @@ class MainWindow(QMainWindow):
     # todo: process all images from list
     # todo: SORT TABLE AFTER CHANGE ORDER
     # Todo: все числа между старым и новым уменьшатся на 1
-
-
-
