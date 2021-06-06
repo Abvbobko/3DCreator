@@ -34,6 +34,12 @@ class ActionController:
             default_algorithm_name=steps_default_params.BUNDLE_ADJUST_DEFAULT_PARAMS.default_algorithm
         )
 
+        self.steps = [self.feature_extraction,
+                      self.feature_matching,
+                      self.reconstruction,
+                      self.bundle_adjustment]
+
+    # todo: may be change?
     def get_feature_extraction_algorithms(self):
         """Get all feature extraction algorithms"""
         return self.get_step_algorithms(self.feature_extraction)
@@ -65,8 +71,10 @@ class ActionController:
             (Step): step object with step_name
         """
 
-        steps = [self.feature_extraction, self.feature_matching, self.reconstruction, self.bundle_adjustment]
-        for step in steps:
+        for step in self.steps:
             if step_name == str(step):
                 return step
         return None
+
+    def get_steps(self):
+        return [str(step) for step in self.steps]

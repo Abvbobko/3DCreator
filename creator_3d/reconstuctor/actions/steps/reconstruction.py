@@ -12,9 +12,9 @@ class Reconstructor(Reconstruct):
         super().__init__(**kwargs)
 
     @staticmethod
-    def __get_projection(K, R, T):
+    def __get_projection(k, r, t):
         projection = np.zeros((3, 4))
-        projection[0:3, 0:3] = np.float32(R)
+        projection[0:3, 0:3] = np.float32(r)
         projection[:, 3] = np.float32(T.T)
         fk = np.float32(K)
         return np.dot(fk, projection)
