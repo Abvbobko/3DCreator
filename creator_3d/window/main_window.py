@@ -259,13 +259,4 @@ class MainWindow(QMainWindow):
     # message window
     # show_model
 
-    # todo: Main
-    # todo: add parameters setting
-    # todo: add algorithm choosing by combobox
-    # todo: may be buttons add "Add images" and "Clear" instead of "Load images"
-    # todo: add camera params input (f, sw, sh, get_camera_params)
-
-    # todo: Process button
-    # todo: process all images from list
-    # todo: SORT TABLE AFTER CHANGE ORDER
     # Todo: все числа между старым и новым уменьшатся на 1

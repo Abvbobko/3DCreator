@@ -134,10 +134,15 @@ class Calibrator:
         param_names = ['FocalLength', 'Model']
         params = self.get_params_from_exif_by_name(image, param_names)
         params["Image width"], params["Image height"] = self.get_image_size(image)
-        if params['FocalLength']:
+        if 'FocalLength' in params and params['FocalLength']:
             params['FocalLength'] = float(params['FocalLength'])
-        if params['Model']:
+        else:
+            params['FocalLength'] = ''
+        if 'Model' in params and params['Model']:
             params['Sensor width'], params['Sensor height'] = self.get_sensor_size_by_camera_model(params["Model"])
+        else:
+            params['Model'] = None
+            params['Sensor width'], params['Sensor height'] = '', ''
 
         return Camera(focal_length=params['FocalLength'],
                       image_width=params["Image width"],
