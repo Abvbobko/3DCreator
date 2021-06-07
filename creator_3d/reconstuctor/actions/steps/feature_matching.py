@@ -1,6 +1,5 @@
-from creator_3d.reconstuctor.actions.action import Match
+import creator_3d.reconstuctor.actions.action as actions
 
-from abc import ABC, abstractmethod
 import cv2
 import numpy as np
 from creator_3d.reconstuctor.constants import algorithm_default_params as default_params
@@ -9,7 +8,7 @@ from creator_3d.reconstuctor.constants import pipeline_const
 # todo: есть knnMatch, а есть просто match узнать, в чем разница
 
 
-class BFMatcher(Match):
+class BFMatcher(actions.Match):
 
     __default_params = default_params.BF_DEFAULT_PARAMS.params
 
@@ -36,7 +35,7 @@ class BFMatcher(Match):
         return default_params.BF_DEFAULT_PARAMS.name
 
 
-class FLANNMatcher(Match):
+class FLANNMatcher(actions.Match):
 
     __default_params = default_params.FLANN_DEFAULT_PARAMS.params
 

@@ -23,6 +23,9 @@ class MainController:
     def get_step_algorithms(self, step_name):
         return self.reconstructor.get_algorithms_for_step(step_name)
 
+    def get_algorithm_names_for_step(self, step_name):
+        return self.reconstructor.get_algorithm_names_for_step(step_name)
+
     def get_extract_step_name(self):
         return self.reconstructor.get_feature_extract_step_name()
 

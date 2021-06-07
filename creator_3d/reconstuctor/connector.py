@@ -40,6 +40,10 @@ class ReconstructorConnector:
                 return step_object.get_step_algorithms()
         return None
 
+    def get_algorithm_names_for_step(self, step_name):
+        algorithms = self.get_algorithms_for_step(step_name)
+        return [str(algorithm) for algorithm in algorithms]
+
     # def set_camera(self, f_mm, sw, sh, img_w, img_h):
     #     # todo: delete and change
     #     intrinsic_matrix = self.camera_calibrator.create_intrinsic_matrix(f_mm=f_mm,

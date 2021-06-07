@@ -45,25 +45,25 @@ class MainWindow(QMainWindow):
         self.feature_extraction_combobox.step_name = self.main_controller.get_extract_step_name()
         self.feature_extraction_combobox.clear()
         self.feature_extraction_combobox.addItems(
-            self.main_controller.get_step_algorithms(self.feature_extraction_combobox.step_name)
+            self.main_controller.get_algorithm_names_for_step(self.feature_extraction_combobox.step_name)
         )
 
         self.feature_matching_combobox.step_name = self.main_controller.get_match_step_name()
         self.feature_matching_combobox.clear()
         self.feature_matching_combobox.addItems(
-            self.main_controller.get_step_algorithms(self.feature_matching_combobox.step_name)
+            self.main_controller.get_algorithm_names_for_step(self.feature_matching_combobox.step_name)
         )
 
         self.reconstruction_combobox.step_name = self.main_controller.get_reconstruct_step_name()
         self.reconstruction_combobox.clear()
         self.reconstruction_combobox.addItems(
-            self.main_controller.get_step_algorithms(self.reconstruction_combobox.step_name)
+            self.main_controller.get_algorithm_names_for_step(self.reconstruction_combobox.step_name)
         )
 
         self.bundle_adjustment_combobox.step_name = self.main_controller.get_bundle_adjust_step_name()
         self.bundle_adjustment_combobox.clear()
         self.bundle_adjustment_combobox.addItems(
-            self.main_controller.get_step_algorithms(self.bundle_adjustment_combobox.step_name)
+            self.main_controller.get_algorithm_names_for_step(self.bundle_adjustment_combobox.step_name)
         )
 
         # camera parameters edits
