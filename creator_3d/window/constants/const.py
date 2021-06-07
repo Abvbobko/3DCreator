@@ -74,3 +74,7 @@ IMAGE_HEIGHT_EDIT_CONST = EditConstValue(field_name="image height",
                                          max_length=4,
                                          can_be_empty=False,
                                          mask_regex=r"\d+")
+
+EXIF_IMAGE_DIALOG_TITLE = "Open image file"
+EXIF_IMAGE_DIALOG_DIR = IMAGES_FOR_PROCESS_DIALOG_DIR
+EXIF_IMAGE_DIALOG_FILE_FILTER = IMAGES_FOR_PROCESS_DIALOG_FILE_FILTER

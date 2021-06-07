@@ -57,6 +57,7 @@ class Pipeline:
         return np.array(key_points_for_all), np.array(descriptor_for_all)
 
     def __match_features(self, descriptors):
+        """Match features between images"""
         logger.info("Match features.")
         matches_for_all_images = []
         for i in range(len(descriptors) - 1):
@@ -75,6 +76,8 @@ class Pipeline:
 
     @staticmethod
     def __find_transform(K, p1, p2):
+        """Find rotation and transform matrices"""
+
         focal_length = 0.5 * (K[0, 0] + K[1, 1])  # todo: 0.5 to const?
         principle_point = (K[0, 2], K[1, 2])
         E, mask = cv2.findEssentialMat(p1, p2, focal_length, principle_point, cv2.RANSAC, 0.999, 1.0)  # it's params !!!
@@ -94,9 +97,10 @@ class Pipeline:
         return np.array(p1_copy)
 
     def __init_structure(self, key_points_for_all, matches_for_all):
+        """Create structure with the first items"""
         p1, p2 = self.__get_matched_points(key_points_for_all[0], key_points_for_all[1], matches_for_all[0])
 
-        K = self.camera.get_k()
+        K = self.camera.K
         transform = self.__find_transform(K, p1, p2)
         if transform:
             R, T, mask = transform
@@ -158,6 +162,15 @@ class Pipeline:
         return struct_indices, next_struct_indices, structure
 
     def run(self, image_names):
+        """Run image processing
+
+        Args:
+            image_names (list[str]): list of image paths
+
+        Returns:
+            (np.array): result point cloud.
+        """
+
         # todo: think how to implement image loading
         key_points, descriptor = self.__extract_features(image_names)
         matches = self.__match_features(descriptor)
@@ -178,14 +191,14 @@ class Pipeline:
                     object_points = np.append(object_points, [object_points[0]], axis=0)
                     image_points = np.append(image_points, [image_points[0]], axis=0)
 
-            _, r, T, _ = cv2.solvePnPRansac(object_points, image_points, self.camera.get_k(), np.array([]))
+            _, r, T, _ = cv2.solvePnPRansac(object_points, image_points, self.camera.K, np.array([]))
             R, _ = cv2.Rodrigues(r)
             rotations.append(R)
             motions.append(T)
             p1, p2 = self.__get_matched_points(key_points[i],
                                                key_points[i + 1],
                                                matches[i])
-            next_structure = self.reconstructor.reconstruct(K=self.camera.get_k(),
+            next_structure = self.reconstructor.reconstruct(K=self.camera.K,
                                                             R1=rotations[i],
                                                             T1=motions[i],
                                                             R2=R,
@@ -202,7 +215,7 @@ class Pipeline:
 
         structure = self.bundle_adjuster.bundle_adjustment(rotations=rotations,
                                                            motions=motions,
-                                                           K=self.camera.get_k(),
+                                                           K=self.camera.K,
                                                            correspond_struct_idx=correspond_struct_idx,
                                                            key_points=key_points,
                                                            structure=structure)

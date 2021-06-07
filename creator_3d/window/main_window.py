@@ -67,35 +67,38 @@ class MainWindow(QMainWindow):
         )
 
         # camera parameters edits
-        self.set_string_edit(edit=self.focal_length_edit,
-                             field_name=window_const.FOCAL_LENGTH_EDIT_CONST.field_name,
-                             max_length=window_const.FOCAL_LENGTH_EDIT_CONST.max_length,
-                             mask_regex=window_const.FOCAL_LENGTH_EDIT_CONST.mask_regex,
-                             can_be_empty=window_const.FOCAL_LENGTH_EDIT_CONST.can_be_empty)
+        self.__set_string_edit(edit=self.focal_length_edit,
+                               field_name=window_const.FOCAL_LENGTH_EDIT_CONST.field_name,
+                               max_length=window_const.FOCAL_LENGTH_EDIT_CONST.max_length,
+                               mask_regex=window_const.FOCAL_LENGTH_EDIT_CONST.mask_regex,
+                               can_be_empty=window_const.FOCAL_LENGTH_EDIT_CONST.can_be_empty)
 
-        self.set_string_edit(edit=self.sensor_width_edit,
-                             field_name=window_const.SENSOR_WIDTH_EDIT_CONST.field_name,
-                             max_length=window_const.SENSOR_WIDTH_EDIT_CONST.max_length,
-                             mask_regex=window_const.SENSOR_WIDTH_EDIT_CONST.mask_regex,
-                             can_be_empty=window_const.SENSOR_WIDTH_EDIT_CONST.can_be_empty)
+        self.__set_string_edit(edit=self.sensor_width_edit,
+                               field_name=window_const.SENSOR_WIDTH_EDIT_CONST.field_name,
+                               max_length=window_const.SENSOR_WIDTH_EDIT_CONST.max_length,
+                               mask_regex=window_const.SENSOR_WIDTH_EDIT_CONST.mask_regex,
+                               can_be_empty=window_const.SENSOR_WIDTH_EDIT_CONST.can_be_empty)
 
-        self.set_string_edit(edit=self.sensor_height_edit,
-                             field_name=window_const.SENSOR_HEIGHT_EDIT_CONST.field_name,
-                             max_length=window_const.SENSOR_HEIGHT_EDIT_CONST.max_length,
-                             mask_regex=window_const.SENSOR_HEIGHT_EDIT_CONST.mask_regex,
-                             can_be_empty=window_const.SENSOR_HEIGHT_EDIT_CONST.can_be_empty)
+        self.__set_string_edit(edit=self.sensor_height_edit,
+                               field_name=window_const.SENSOR_HEIGHT_EDIT_CONST.field_name,
+                               max_length=window_const.SENSOR_HEIGHT_EDIT_CONST.max_length,
+                               mask_regex=window_const.SENSOR_HEIGHT_EDIT_CONST.mask_regex,
+                               can_be_empty=window_const.SENSOR_HEIGHT_EDIT_CONST.can_be_empty)
 
-        self.set_string_edit(edit=self.image_width_edit,
-                             field_name=window_const.IMAGE_WIDTH_EDIT_CONST.field_name,
-                             max_length=window_const.IMAGE_WIDTH_EDIT_CONST.max_length,
-                             mask_regex=window_const.IMAGE_WIDTH_EDIT_CONST.mask_regex,
-                             can_be_empty=window_const.IMAGE_WIDTH_EDIT_CONST.can_be_empty)
+        self.__set_string_edit(edit=self.image_width_edit,
+                               field_name=window_const.IMAGE_WIDTH_EDIT_CONST.field_name,
+                               max_length=window_const.IMAGE_WIDTH_EDIT_CONST.max_length,
+                               mask_regex=window_const.IMAGE_WIDTH_EDIT_CONST.mask_regex,
+                              can_be_empty=window_const.IMAGE_WIDTH_EDIT_CONST.can_be_empty)
 
-        self.set_string_edit(edit=self.image_height_edit,
-                             field_name=window_const.IMAGE_HEIGHT_EDIT_CONST.field_name,
-                             max_length=window_const.IMAGE_HEIGHT_EDIT_CONST.max_length,
-                             mask_regex=window_const.IMAGE_HEIGHT_EDIT_CONST.mask_regex,
-                             can_be_empty=window_const.IMAGE_HEIGHT_EDIT_CONST.can_be_empty)
+        self.__set_string_edit(edit=self.image_height_edit,
+                               field_name=window_const.IMAGE_HEIGHT_EDIT_CONST.field_name,
+                               max_length=window_const.IMAGE_HEIGHT_EDIT_CONST.max_length,
+                               mask_regex=window_const.IMAGE_HEIGHT_EDIT_CONST.mask_regex,
+                               can_be_empty=window_const.IMAGE_HEIGHT_EDIT_CONST.can_be_empty)
+
+        # exif loading
+        self.load_params_from_exif_button.clicked.connect(self.__choose_file_and_load_camera_params)
 
         # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
@@ -129,12 +132,12 @@ class MainWindow(QMainWindow):
         #
 
     @staticmethod
-    def set_string_edit(edit,
-                        field_name=None,
-                        can_be_empty=False,
-                        max_length=255,
-                        mask_regex=None,
-                        placeholder=None):
+    def __set_string_edit(edit,
+                          field_name=None,
+                          can_be_empty=False,
+                          max_length=255,
+                          mask_regex=None,
+                          placeholder=None):
         """Set parameters to the edit"""
 
         edit.mask_regex = mask_regex
@@ -145,6 +148,27 @@ class MainWindow(QMainWindow):
         edit.can_be_empty = can_be_empty
         if placeholder:
             edit.setPlaceholderText(placeholder)
+
+    def __choose_file_and_load_camera_params(self):
+        image_files = self.__open_file_dialog(title=window_const.EXIF_IMAGE_DIALOG_TITLE,
+                                              directory=window_const.EXIF_IMAGE_DIALOG_DIR,
+                                              file_filter=window_const.EXIF_IMAGE_DIALOG_FILE_FILTER)
+        if image_files:
+            image_file_path = image_files[0]
+            camera = self.__load_params_from_exif_image(image_file_path)
+            self.__fill_camera_params_edits(camera)
+
+    def __load_params_from_exif_image(self, image_path):
+        return self.main_controller.get_params_from_exif_image(image_path)
+
+    def __fill_camera_params_edits(self, camera):
+        self.focal_length_edit.setText(camera.focal_length)
+        sensor_size = camera.sensor_size
+        self.sensor_width_edit.setText(sensor_size[0])
+        self.sensor_height_edit.setText(sensor_size[1])
+        image_size = camera.image_size
+        self.image_width_edit.setText(image_size[0])
+        self.image_height_edit.setText(image_size[1])
 
     def __choose_files_and_fill_image_table(self):
         image_files = self.__open_file_dialog(title=window_const.IMAGES_FOR_PROCESS_DIALOG_TITLE,
