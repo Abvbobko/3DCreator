@@ -8,8 +8,7 @@ from PyQt5.QtWidgets import (QApplication,
                              QHeaderView,
                              QFileDialog,
                              qApp)
-from PyQt5.QtCore import Qt
-
+from PyQt5.QtCore import (Qt, QRegExp, QDate)
 import cv2
 import os
 import creator_3d.window.constants.const as window_const
@@ -67,6 +66,37 @@ class MainWindow(QMainWindow):
             self.main_controller.get_step_algorithms(self.bundle_adjustment_combobox.step_name)
         )
 
+        # camera parameters edits
+        self.set_string_edit(edit=self.focal_length_edit,
+                             field_name=window_const.FOCAL_LENGTH_EDIT_CONST.field_name,
+                             max_length=window_const.FOCAL_LENGTH_EDIT_CONST.max_length,
+                             mask_regex=window_const.FOCAL_LENGTH_EDIT_CONST.mask_regex,
+                             can_be_empty=window_const.FOCAL_LENGTH_EDIT_CONST.can_be_empty)
+
+        self.set_string_edit(edit=self.sensor_width_edit,
+                             field_name=window_const.SENSOR_WIDTH_EDIT_CONST.field_name,
+                             max_length=window_const.SENSOR_WIDTH_EDIT_CONST.max_length,
+                             mask_regex=window_const.SENSOR_WIDTH_EDIT_CONST.mask_regex,
+                             can_be_empty=window_const.SENSOR_WIDTH_EDIT_CONST.can_be_empty)
+
+        self.set_string_edit(edit=self.sensor_height_edit,
+                             field_name=window_const.SENSOR_HEIGHT_EDIT_CONST.field_name,
+                             max_length=window_const.SENSOR_HEIGHT_EDIT_CONST.max_length,
+                             mask_regex=window_const.SENSOR_HEIGHT_EDIT_CONST.mask_regex,
+                             can_be_empty=window_const.SENSOR_HEIGHT_EDIT_CONST.can_be_empty)
+
+        self.set_string_edit(edit=self.image_width_edit,
+                             field_name=window_const.IMAGE_WIDTH_EDIT_CONST.field_name,
+                             max_length=window_const.IMAGE_WIDTH_EDIT_CONST.max_length,
+                             mask_regex=window_const.IMAGE_WIDTH_EDIT_CONST.mask_regex,
+                             can_be_empty=window_const.IMAGE_WIDTH_EDIT_CONST.can_be_empty)
+
+        self.set_string_edit(edit=self.image_height_edit,
+                             field_name=window_const.IMAGE_HEIGHT_EDIT_CONST.field_name,
+                             max_length=window_const.IMAGE_HEIGHT_EDIT_CONST.max_length,
+                             mask_regex=window_const.IMAGE_HEIGHT_EDIT_CONST.mask_regex,
+                             can_be_empty=window_const.IMAGE_HEIGHT_EDIT_CONST.can_be_empty)
+
         # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
         #          "sigma"],
@@ -97,6 +127,24 @@ class MainWindow(QMainWindow):
         # for i in range(len(test_text)):
         #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
         #
+
+    @staticmethod
+    def set_string_edit(edit,
+                        field_name=None,
+                        can_be_empty=False,
+                        max_length=255,
+                        mask_regex=None,
+                        placeholder=None):
+        """Set parameters to the edit"""
+
+        edit.mask_regex = mask_regex
+        edit.setMaxLength(max_length)
+        if mask_regex:
+            edit.setValidator(QtGui.QRegExpValidator(QRegExp(edit.mask_regex)))
+        edit.field_name = field_name
+        edit.can_be_empty = can_be_empty
+        if placeholder:
+            edit.setPlaceholderText(placeholder)
 
     def __choose_files_and_fill_image_table(self):
         image_files = self.__open_file_dialog(title=window_const.IMAGES_FOR_PROCESS_DIALOG_TITLE,
@@ -131,7 +179,7 @@ class MainWindow(QMainWindow):
         self.image_table.setRowCount(num_of_images)
         for i in range(num_of_images):
             # insert order number
-            order = str(i+1)
+            order = str(i + 1)
             order_item = QTableWidgetItem(order)
             self.image_table.setItem(i, 0, order_item)
 
@@ -163,8 +211,6 @@ class MainWindow(QMainWindow):
                 if item_order_number > order_of_removing_image:
                     item_order_number -= 1
                     self.image_table.item(i, 0).setText(str(item_order_number))
-
-
 
     def get_next_image_number(self):
         pass
