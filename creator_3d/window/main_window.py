@@ -162,13 +162,14 @@ class MainWindow(QMainWindow):
         return self.main_controller.get_params_from_exif_image(image_path)
 
     def __fill_camera_params_edits(self, camera):
-        self.focal_length_edit.setText(camera.focal_length)
+        # test: test when not all camera params are available
+        self.focal_length_edit.setText(str(camera.focal_length))
         sensor_size = camera.sensor_size
-        self.sensor_width_edit.setText(sensor_size[0])
-        self.sensor_height_edit.setText(sensor_size[1])
+        self.sensor_width_edit.setText(str(sensor_size[0]))
+        self.sensor_height_edit.setText(str(sensor_size[1]))
         image_size = camera.image_size
-        self.image_width_edit.setText(image_size[0])
-        self.image_height_edit.setText(image_size[1])
+        self.image_width_edit.setText(str(image_size[0]))
+        self.image_height_edit.setText(str(image_size[1]))
 
     def __choose_files_and_fill_image_table(self):
         image_files = self.__open_file_dialog(title=window_const.IMAGES_FOR_PROCESS_DIALOG_TITLE,

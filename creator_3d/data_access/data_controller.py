@@ -33,6 +33,15 @@ class DataController:
 
     @staticmethod
     def intrinsic_reader(txt_file):
+        """Read intrinsic camera matrix from file.
+
+        Args:
+            txt_file (str): path to file with matrix inside.
+
+        Returns:
+            (np.array): camera intrinsic matrix.
+        """
+
         with open(txt_file) as f:
             lines = f.readlines()
         return np.array(
@@ -42,20 +51,54 @@ class DataController:
 
     @staticmethod
     def safe_mkdir(file_dir):
+        """Create dir if it does not exist"""
+
         if not os.path.exists(file_dir):
             os.mkdir(file_dir)
 
     @staticmethod
-    def write_simple_obj(mesh_v, mesh_f, file_path):
-        with open(file_path, 'w') as fp:
+    def write_obj_file(mesh_v, mesh_f, file_path):
+        """Write point cloud to .obj file
+
+        Args:
+            mesh_v (np.array): coordinates of points
+            mesh_f (np.array): faces of model
+            file_path (str): path to result file
+        """
+
+        with open(file_path, 'w') as obj_file:
             for v in mesh_v:
-                fp.write('v %f %f %f\n' % (v[0], v[1], v[2]))
+                obj_file.write('v %f %f %f\n' % (v[0], v[1], v[2]))
             if mesh_f is not None:
                 for f in mesh_f + 1:
-                    fp.write('f %d %d %d\n' % (f[0], f[1], f[2]))
+                    obj_file.write('f %d %d %d\n' % (f[0], f[1], f[2]))
+
+    @staticmethod
+    def write_ply_file(mesh_v, file_path):
+        """Write point cloud to .ply file
+
+        Args:
+            mesh_v (np.array): coordinates of points
+            file_path (str): path to result file
+        """
+
+        with open(file_path, 'w') as ply_file:
+            # Write header of .ply file
+            ply_file.write('ply\n')
+            ply_file.write('format ascii 1.0\n')
+            ply_file.write('element vertex %d\n' % mesh_v.shape[0])
+            ply_file.write('property float x\n')
+            ply_file.write('property float y\n')
+            ply_file.write('property float z\n')
+            ply_file.write('end_header\n')
+
+            for v in mesh_v:
+                ply_file.write('%f %f %f\n' % (v[0], v[1], v[2]))
 
     @staticmethod
     def read_pil_image(image_path):
+        """Read image using PIL lib"""
+
         try:
             image = PIL.Image.open(image_path)
         except FileNotFoundError:
@@ -68,6 +111,8 @@ class DataController:
 
     @staticmethod
     def read_cv2_image(image_path):
+        """Read image using cv2 lib (Mat object)"""
+
         try:
             image = cv2.imread(image_path)
         except FileNotFoundError:
@@ -90,6 +135,6 @@ class DataController:
 
             for row in reader:
                 if row['CameraModel'] in [model, camera_model]:
-                    return row['SensorWidth(mm)'], row['SensorHeight(mm)']
+                    return float(row['SensorWidth(mm)']), float(row['SensorHeight(mm)'])
 
         return None, None
