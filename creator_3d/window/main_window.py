@@ -42,15 +42,30 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
-        # combobox filling example todo remove
-        # self.feature_extraction_combobox.clear()
-        # self.feature_extraction_combobox.addItems(['SIFT', 'SURF', 'ORB'])
-        # self.feature_matching_combobox.clear()
-        # self.feature_matching_combobox.addItems(['FLANN', 'BF', 'KNN'])
-        # self.reconstruction_combobox.clear()
-        # self.reconstruction_combobox.addItems(['Reconstructor'])
-        # self.bundle_adjustment_combobox.clear()
-        # self.bundle_adjustment_combobox.addItems(['Bundle adjustment'])
+        # combobox filling
+        self.feature_extraction_combobox.step_name = self.main_controller.get_extract_step_name()
+        self.feature_extraction_combobox.clear()
+        self.feature_extraction_combobox.addItems(
+            self.main_controller.get_step_algorithms(self.feature_extraction_combobox.step_name)
+        )
+
+        self.feature_matching_combobox.step_name = self.main_controller.get_match_step_name()
+        self.feature_matching_combobox.clear()
+        self.feature_matching_combobox.addItems(
+            self.main_controller.get_step_algorithms(self.feature_matching_combobox.step_name)
+        )
+
+        self.reconstruction_combobox.step_name = self.main_controller.get_reconstruct_step_name()
+        self.reconstruction_combobox.clear()
+        self.reconstruction_combobox.addItems(
+            self.main_controller.get_step_algorithms(self.reconstruction_combobox.step_name)
+        )
+
+        self.bundle_adjustment_combobox.step_name = self.main_controller.get_bundle_adjust_step_name()
+        self.bundle_adjustment_combobox.clear()
+        self.bundle_adjustment_combobox.addItems(
+            self.main_controller.get_step_algorithms(self.bundle_adjustment_combobox.step_name)
+        )
 
         # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
@@ -130,13 +145,26 @@ class MainWindow(QMainWindow):
             remove_button_sell.clicked.connect(self.__remove_item_from_image_table)
             self.image_table.setCellWidget(i, 2, remove_button_sell)
 
+    # todo: add ограничения на ввод только чисел в номере
+
     def __remove_item_from_image_table(self):
         """Remove row of clicked button in image table"""
 
         button = qApp.focusWidget()
         index = self.image_table.indexAt(button.pos())
         if index.isValid():
-            self.image_table.removeRow(index.row())
+            order_of_removing_image = index.row()
+            self.image_table.removeRow(order_of_removing_image)
+            # change other order numbers
+            for i in range(self.image_table.rowCount()):
+                # get order number
+                item_text = self.image_table.item(i, 0).text()
+                item_order_number = int(item_text)
+                if item_order_number > order_of_removing_image:
+                    item_order_number -= 1
+                    self.image_table.item(i, 0).setText(str(item_order_number))
+
+
 
     def get_next_image_number(self):
         pass
@@ -159,7 +187,6 @@ class MainWindow(QMainWindow):
     # error window
     # message window
     # show_model
-    #
 
     # todo: Main
     # todo: add parameters setting
