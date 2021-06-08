@@ -92,6 +92,8 @@ class MainWindow(QMainWindow):
         # exif loading
         self.load_params_from_exif_button.clicked.connect(self.__choose_file_and_load_camera_params)
 
+        self.set_default_algorithms_button.clicked.connect(self.__set_default_algorithms)
+
         # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
         #          "sigma"],
@@ -123,8 +125,23 @@ class MainWindow(QMainWindow):
         #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
         #
 
+    def __set_default_algorithms(self):
+        comboboxes = [self.feature_extraction_combobox,
+                      self.feature_matching_combobox,
+                      self.reconstruction_combobox,
+                      self.bundle_adjustment_combobox]
+
+        for combobox in comboboxes:
+            default_algorithm = combobox.default_algorithm
+            if default_algorithm:
+                index = combobox.findText(default_algorithm)
+                if index >= 0:
+                    combobox.setCurrentIndex(index)
+        # todo: add default params of algorithm setting
+
     def __set_combobox(self, combobox, step_name, default_algorithm=''):
         combobox.step_name = step_name
+        combobox.default_algorithm = default_algorithm
         combobox.clear()
         combobox.addItems(self.main_controller.get_algorithm_names_for_step(combobox.step_name))
         if default_algorithm:
