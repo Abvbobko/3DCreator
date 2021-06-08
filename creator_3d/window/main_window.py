@@ -157,6 +157,52 @@ class MainWindow(QMainWindow):
             image_file_path = image_files[0]
             camera = self.__load_params_from_exif_image(image_file_path)
             self.__fill_camera_params_edits(camera)
+            self.__show_camera_model_and_empty_params(camera)
+
+    @staticmethod
+    def call_message_box(title="", text="", icon=QMessageBox.NoIcon):
+        message_box = QMessageBox()
+        message_box.setIcon(icon)
+        message_box.setText(text)
+        message_box.setWindowTitle(title)
+        message_box.exec_()
+
+    @staticmethod
+    def call_error_box(error_title="Error", error_text=""):
+        print("ERROR")
+        MainWindow.call_message_box(error_title, error_text, QMessageBox.Critical)
+
+    @staticmethod
+    def call_ok_box(ok_title="ОK", ok_text=""):
+        print("OK")
+        MainWindow.call_message_box(ok_title, ok_text, QMessageBox.Information)
+
+    def __show_camera_model_and_empty_params(self, camera):
+        if camera.model:
+            camera_model_text = camera.model
+        else:
+            camera_model_text = "not recognized"
+
+        params = {
+            camera.focal_length_param_name: camera.focal_length,
+            camera.sensor_size_param_name[0]: camera.sensor_size[0],
+            camera.sensor_size_param_name[1]: camera.sensor_size[1],
+            camera.image_size_param_name[0]: camera.image_size[0],
+            camera.image_size_param_name[1]: camera.image_size[0]
+        }
+
+        empty_params = []
+        for param_name in params:
+            if not params[param_name]:
+                empty_params.append(param_name)
+
+        if empty_params:
+            empty_params_text = "\nNot recognized params:\n%s." % ",\n".join(empty_params)
+        else:
+            empty_params_text = ""
+
+        message_text = f"Camera model: {camera_model_text}.{empty_params_text}"
+        self.call_ok_box(ok_text=message_text)
 
     def __load_params_from_exif_image(self, image_path):
         return self.main_controller.get_params_from_exif_image(image_path)

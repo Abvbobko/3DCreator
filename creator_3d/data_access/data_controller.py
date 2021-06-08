@@ -125,16 +125,17 @@ class DataController:
 
     @staticmethod
     def get_sensor_size_from_csv(camera_model):
-        # test: test on rock image
         """Tuple (sensor width, sensor height) in mm"""
 
-        model = camera_model.split(None, 1)[-1]
+        camera_make_and_model = camera_model.split(" ", 1)
+        model = camera_make_and_model[0] if len(camera_make_and_model) == 1 else camera_make_and_model[1]
 
         with open(const.SENSOR_DATABASE_PATH, 'r') as sensor_database_csv:
             reader = csv.DictReader(sensor_database_csv)
 
             for row in reader:
-                if row['CameraModel'] in [model, camera_model]:
-                    return float(row['SensorWidth(mm)']), float(row['SensorHeight(mm)'])
+                if row[const.CsvHeaderParamName.camera_model].upper() in [model.upper(), camera_model.upper()]:
+                    return float(row[const.CsvHeaderParamName.sensor_width]), \
+                           float(row[const.CsvHeaderParamName.sensor_height])
 
-        return None, None
+        return '', ''

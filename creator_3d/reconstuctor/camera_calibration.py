@@ -3,12 +3,15 @@ import numpy as np
 import PIL.ExifTags
 import PIL.Image
 from creator_3d.data_access.data_controller import DataController
+from creator_3d.reconstuctor.constants import camera_const
 
 logger = logging.getLogger(__name__)
 
 
 class Camera:
-    def __init__(self, focal_length, image_width, image_height, sensor_width, sensor_height):
+
+    def __init__(self, focal_length, image_width, image_height, sensor_width, sensor_height, model=None):
+        self.__model = model
         self.__focal_length = focal_length
         self.__image_width = image_width
         self.__image_height = image_height
@@ -22,6 +25,26 @@ class Camera:
                                                                      sensor_height=sensor_height)
         else:
             self.__intrinsic_matrix = None
+
+    @property
+    def model_param_name(self):
+        return camera_const.EXIF_PARAMS_NAME.model
+
+    @property
+    def focal_length_param_name(self):
+        return camera_const.EXIF_PARAMS_NAME.focal_length
+
+    @property
+    def sensor_size_param_name(self):
+        return camera_const.EXIF_PARAMS_NAME.sensor_width, camera_const.EXIF_PARAMS_NAME.sensor_height
+
+    @property
+    def image_size_param_name(self):
+        return camera_const.EXIF_PARAMS_NAME.image_width, camera_const.EXIF_PARAMS_NAME.image_height
+
+    @property
+    def model(self):
+        return self.__model
 
     @property
     def K(self):
@@ -131,22 +154,34 @@ class Calibrator:
         return result_dict
 
     def get_camera_params_from_exif(self, image):
-        param_names = ['FocalLength', 'Model']
-        params = self.get_params_from_exif_by_name(image, param_names)
-        params["Image width"], params["Image height"] = self.get_image_size(image)
-        if 'FocalLength' in params and params['FocalLength']:
-            params['FocalLength'] = float(params['FocalLength'])
-        else:
-            params['FocalLength'] = ''
-        if 'Model' in params and params['Model']:
-            params['Sensor width'], params['Sensor height'] = self.get_sensor_size_by_camera_model(params["Model"])
-        else:
-            params['Model'] = None
-            params['Sensor width'], params['Sensor height'] = '', ''
+        im_w_param_name = camera_const.EXIF_PARAMS_NAME.image_width
+        im_h_param_name = camera_const.EXIF_PARAMS_NAME.image_height
+        sw_param_name = camera_const.EXIF_PARAMS_NAME.sensor_width
+        sh_param_name = camera_const.EXIF_PARAMS_NAME.sensor_height
+        model_param_name = camera_const.EXIF_PARAMS_NAME.model
+        focal_length_param_name = camera_const.EXIF_PARAMS_NAME.focal_length
 
-        return Camera(focal_length=params['FocalLength'],
-                      image_width=params["Image width"],
-                      image_height=params["Image height"],
-                      sensor_width=params['Sensor width'],
-                      sensor_height=params['Sensor height'])
+        param_names = [focal_length_param_name, model_param_name]
+        params = self.get_params_from_exif_by_name(image, param_names)
+
+        params[im_w_param_name], params[im_h_param_name] = self.get_image_size(image)
+
+        if focal_length_param_name in params and params[focal_length_param_name]:
+            params[focal_length_param_name] = float(params[focal_length_param_name])
+        else:
+            params[focal_length_param_name] = ''
+        if model_param_name in params and params[model_param_name]:
+            params[sw_param_name], params[sh_param_name] = self.get_sensor_size_by_camera_model(
+                params[model_param_name]
+            )
+        else:
+            params[model_param_name] = None
+            params[sw_param_name], params[sh_param_name] = '', ''
+
+        return Camera(focal_length=params[focal_length_param_name],
+                      image_width=params[im_h_param_name],
+                      image_height=params[im_h_param_name],
+                      sensor_width=params[sw_param_name],
+                      sensor_height=params[sh_param_name],
+                      model=params[model_param_name])
 

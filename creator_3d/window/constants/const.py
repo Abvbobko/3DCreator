@@ -51,9 +51,9 @@ class EditConstValue:
 
 
 FOCAL_LENGTH_EDIT_CONST = EditConstValue(field_name="focal length",
-                                         max_length=6,
+                                         max_length=9,
                                          can_be_empty=False,
-                                         mask_regex=r"\d+(\.\d{1,2})?")
+                                         mask_regex=r"\d+(\.\d{1,4})?")
 
 SENSOR_WIDTH_EDIT_CONST = EditConstValue(field_name="sensor width",
                                          max_length=5,
