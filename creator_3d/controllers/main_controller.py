@@ -20,6 +20,18 @@ class MainController:
     def load_image_by_path(self, image_path):
         return self.data_accessor.read_cv2_image(image_path)
 
+    def get_extract_step_default_algorithm(self):
+        return self.reconstructor.get_feature_extract_default_algorithm()
+
+    def get_match_step_default_algorithm(self):
+        return self.reconstructor.get_feature_match_default_algorithm()
+
+    def get_reconstruct_default_algorithm(self):
+        return self.reconstructor.get_reconstruct_default_algorithm()
+
+    def get_bundle_adjust_default_algorithm(self):
+        return self.reconstructor.get_bundle_adjust_default_algorithm()
+
     def get_step_algorithms(self, step_name):
         return self.reconstructor.get_algorithms_for_step(step_name)
 

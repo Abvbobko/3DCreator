@@ -32,6 +32,10 @@ class ReconstructorConnector:
     def get_algorithm_default_parameters(algorithm: Action):
         return algorithm.get_default_params()
 
+    @staticmethod
+    def get_step_default_algorithm(step: Step):
+        return step.get_default_step_algorithm_name()
+
     def get_algorithms_for_step(self, step_name):
         steps = self.action_controller.get_steps()
         for step in steps:
@@ -43,15 +47,6 @@ class ReconstructorConnector:
     def get_algorithm_names_for_step(self, step_name):
         algorithms = self.get_algorithms_for_step(step_name)
         return [str(algorithm) for algorithm in algorithms]
-
-    # def set_camera(self, f_mm, sw, sh, img_w, img_h):
-    #     # todo: delete and change
-    #     intrinsic_matrix = self.camera_calibrator.create_intrinsic_matrix(f_mm=f_mm,
-    #                                                                       image_width=img_w,
-    #                                                                       image_height=img_h,
-    #                                                                       sensor_width=sw,
-    #                                                                       sensor_height=sh)
-    #     self.camera = Camera(intrinsic_matrix)
 
     def get_camera_params_from_exif(self, image_path) -> Camera:
         image = self.data_controller.read_pil_image(image_path)
@@ -73,3 +68,15 @@ class ReconstructorConnector:
 
     def get_bundle_adjust_step_name(self):
         return self.get_step_name(self.bundle_adjuster)
+
+    def get_feature_extract_default_algorithm(self):
+        return self.get_step_default_algorithm(self.extractor)
+
+    def get_feature_match_default_algorithm(self):
+        return self.get_step_default_algorithm(self.matcher)
+
+    def get_reconstruct_default_algorithm(self):
+        return self.get_step_default_algorithm(self.reconstructor)
+
+    def get_bundle_adjust_default_algorithm(self):
+        return self.get_step_default_algorithm(self.bundle_adjuster)

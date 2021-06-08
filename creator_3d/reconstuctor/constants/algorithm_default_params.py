@@ -39,12 +39,12 @@ ORB_DEFAULT_PARAMS = AlgorithmDefaultParams("ORB", {"nfeatures": 500,
                                                     "fastThreshold": 20})
 
 # matching
-FLANN_DEFAULT_PARAMS = AlgorithmDefaultParams("FLANN", {"index_kdtree": 1,
-                                                        "trees": 5,
-                                                        "checks": 50})
+FLANN_DEFAULT_PARAMS = AlgorithmDefaultParams("FLANNMatcher", {"index_kdtree": 1,
+                                                               "trees": 5,
+                                                               "checks": 50})
 
-BF_DEFAULT_PARAMS = AlgorithmDefaultParams("BF", {"normType": cv2.NORM_L2,
-                                                  "crossCheck": False})
+BF_DEFAULT_PARAMS = AlgorithmDefaultParams("BFMatcher", {"normType": cv2.NORM_L2,
+                                                         "crossCheck": False})
 
 
 # reconstruction

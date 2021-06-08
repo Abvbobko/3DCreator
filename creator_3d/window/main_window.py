@@ -42,29 +42,21 @@ class MainWindow(QMainWindow):
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
 
         # combobox filling
-        self.feature_extraction_combobox.step_name = self.main_controller.get_extract_step_name()
-        self.feature_extraction_combobox.clear()
-        self.feature_extraction_combobox.addItems(
-            self.main_controller.get_algorithm_names_for_step(self.feature_extraction_combobox.step_name)
-        )
+        self.__set_combobox(combobox=self.feature_extraction_combobox,
+                            step_name=self.main_controller.get_extract_step_name(),
+                            default_algorithm=self.main_controller.get_extract_step_default_algorithm())
 
-        self.feature_matching_combobox.step_name = self.main_controller.get_match_step_name()
-        self.feature_matching_combobox.clear()
-        self.feature_matching_combobox.addItems(
-            self.main_controller.get_algorithm_names_for_step(self.feature_matching_combobox.step_name)
-        )
+        self.__set_combobox(combobox=self.feature_matching_combobox,
+                            step_name=self.main_controller.get_match_step_name(),
+                            default_algorithm=self.main_controller.get_match_step_default_algorithm())
 
-        self.reconstruction_combobox.step_name = self.main_controller.get_reconstruct_step_name()
-        self.reconstruction_combobox.clear()
-        self.reconstruction_combobox.addItems(
-            self.main_controller.get_algorithm_names_for_step(self.reconstruction_combobox.step_name)
-        )
+        self.__set_combobox(combobox=self.reconstruction_combobox,
+                            step_name=self.main_controller.get_reconstruct_step_name(),
+                            default_algorithm=self.main_controller.get_reconstruct_default_algorithm())
 
-        self.bundle_adjustment_combobox.step_name = self.main_controller.get_bundle_adjust_step_name()
-        self.bundle_adjustment_combobox.clear()
-        self.bundle_adjustment_combobox.addItems(
-            self.main_controller.get_algorithm_names_for_step(self.bundle_adjustment_combobox.step_name)
-        )
+        self.__set_combobox(combobox=self.bundle_adjustment_combobox,
+                            step_name=self.main_controller.get_bundle_adjust_step_name(),
+                            default_algorithm=self.main_controller.get_bundle_adjust_default_algorithm())
 
         # camera parameters edits
         self.__set_string_edit(edit=self.focal_length_edit,
@@ -89,7 +81,7 @@ class MainWindow(QMainWindow):
                                field_name=window_const.IMAGE_WIDTH_EDIT_CONST.field_name,
                                max_length=window_const.IMAGE_WIDTH_EDIT_CONST.max_length,
                                mask_regex=window_const.IMAGE_WIDTH_EDIT_CONST.mask_regex,
-                              can_be_empty=window_const.IMAGE_WIDTH_EDIT_CONST.can_be_empty)
+                               can_be_empty=window_const.IMAGE_WIDTH_EDIT_CONST.can_be_empty)
 
         self.__set_string_edit(edit=self.image_height_edit,
                                field_name=window_const.IMAGE_HEIGHT_EDIT_CONST.field_name,
@@ -130,6 +122,15 @@ class MainWindow(QMainWindow):
         # for i in range(len(test_text)):
         #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
         #
+
+    def __set_combobox(self, combobox, step_name, default_algorithm=''):
+        combobox.step_name = step_name
+        combobox.clear()
+        combobox.addItems(self.main_controller.get_algorithm_names_for_step(combobox.step_name))
+        if default_algorithm:
+            index = combobox.findText(default_algorithm)
+            if index >= 0:
+                combobox.setCurrentIndex(index)
 
     @staticmethod
     def __set_string_edit(edit,
@@ -178,6 +179,8 @@ class MainWindow(QMainWindow):
         MainWindow.call_message_box(ok_title, ok_text, QMessageBox.Information)
 
     def __show_camera_model_and_empty_params(self, camera):
+        """Call message box with camera model and unrecognized params"""
+
         if camera.model:
             camera_model_text = camera.model
         else:
