@@ -75,19 +75,6 @@ class Pipeline:
         return src_pts, dst_pts
 
     @staticmethod
-    def __find_transform(K, p1, p2):
-        """Find rotation and transform matrices"""
-
-        focal_length = 0.5 * (K[0, 0] + K[1, 1])  # todo: 0.5 to const?
-        principle_point = (K[0, 2], K[1, 2])
-        E, mask = cv2.findEssentialMat(p1, p2, focal_length, principle_point, cv2.RANSAC, 0.999, 1.0)  # it's params !!!
-        camera_matrix = np.array(
-            [[focal_length, 0, principle_point[0]], [0, focal_length, principle_point[1]], [0, 0, 1]])
-        pass_count, R, T, mask = cv2.recoverPose(E, p1, p2, camera_matrix, mask)
-
-        return R, T, mask
-
-    @staticmethod
     def __mask_out_points(p1, mask):
         p1_copy = []
         for i in range(len(mask)):
@@ -101,7 +88,7 @@ class Pipeline:
         p1, p2 = self.__get_matched_points(key_points_for_all[0], key_points_for_all[1], matches_for_all[0])
 
         K = self.camera.K
-        transform = self.__find_transform(K, p1, p2)
+        transform = self.reconstructor.__find_transform(K, p1, p2)
         if transform:
             R, T, mask = transform
         else:
@@ -213,12 +200,12 @@ class Pipeline:
                 structure, next_structure
             )
 
-        structure = self.bundle_adjuster.bundle_adjustment(rotations=rotations,
-                                                           motions=motions,
-                                                           K=self.camera.K,
-                                                           correspond_struct_idx=correspond_struct_idx,
-                                                           key_points=key_points,
-                                                           structure=structure)
+        structure = self.bundle_adjuster.adjust_bundle(rotations=rotations,
+                                                       motions=motions,
+                                                       K=self.camera.K,
+                                                       correspond_struct_idx=correspond_struct_idx,
+                                                       key_points=key_points,
+                                                       structure=structure)
         i = 0
         while i < len(structure):
             if math.isnan(structure[i][0]):

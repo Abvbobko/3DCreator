@@ -48,7 +48,10 @@ BF_DEFAULT_PARAMS = AlgorithmDefaultParams("BFMatcher", {"normType": cv2.NORM_L2
 
 
 # reconstruction
-RECONSTRUCT_DEFAULT_PARAMS = AlgorithmDefaultParams("Reconstructor", {})
+RECONSTRUCT_DEFAULT_PARAMS = AlgorithmDefaultParams("Reconstructor", {'scale': 0.5,
+                                                                      'E_prob': 0.999,
+                                                                      'E_threshold': 1.0})
 
 # bundle adjustment
-BUNDLE_ADJUSTMENT_DEFAULT_PARAMS = AlgorithmDefaultParams("BundleAdjuster", {})
+BUNDLE_ADJUSTMENT_DEFAULT_PARAMS = AlgorithmDefaultParams("BundleAdjuster", {'x_threshold': 0,
+                                                                             'y_threshold': 1})

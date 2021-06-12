@@ -12,13 +12,14 @@ class BundleAdjuster(actions.BundleAdjustment):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.x_threshold = kwargs.get('x_threshold')
+        self.y_threshold = kwargs.get('y_threshold')
 
-    @staticmethod
-    def __get_3d_pos(pos, ob, r, t, K):
+    def __get_3d_pos(self, pos, ob, r, t, K):
         p, J = cv2.projectPoints(pos.reshape(1, 1, 3), r, t, K, np.array([]))
         p = p.reshape(2)
         e = ob - p
-        if abs(e[0]) > pipeline_const.x or abs(e[1]) > pipeline_const.y:
+        if abs(e[0]) > self.x_threshold or abs(e[1]) > self.y_threshold:
             return None
         return pos
 

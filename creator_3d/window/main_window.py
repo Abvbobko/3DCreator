@@ -58,6 +58,11 @@ class MainWindow(QMainWindow):
                             step_name=self.main_controller.get_bundle_adjust_step_name(),
                             default_algorithm=self.main_controller.get_bundle_adjust_default_algorithm())
 
+        self.feature_extraction_combobox.currentTextChanged.connect(self.__change_extraction_step_algorithm)
+        self.feature_matching_combobox.currentTextChanged.connect(self.__change_matching_step_algorithm)
+        self.reconstruction_combobox.currentTextChanged.connect(self.__change_reconstruction_step_algorithm)
+        self.bundle_adjustment_combobox.currentTextChanged.connect(self.__change_bundle_adjustment_step_algorithm)
+
         # camera parameters edits
         self.__set_string_edit(edit=self.focal_length_edit,
                                field_name=window_const.FOCAL_LENGTH_EDIT_CONST.field_name,
@@ -120,11 +125,96 @@ class MainWindow(QMainWindow):
     def __create_empty_table_cell(is_editable=False):
         return MainWindow.__create_table_item('', is_editable)
 
+    def __change_combobox_step_algorithm(self, combobox, new_algorithm):
+        self.__refill_step_in_algorithm_table(combobox.step_name, new_algorithm)
+
+    def __change_extraction_step_algorithm(self, value):        
+        self.__change_combobox_step_algorithm(self.feature_extraction_combobox, value)
+
+    def __change_matching_step_algorithm(self, value):
+        self.__change_combobox_step_algorithm(self.feature_matching_combobox, value)
+
+    def __change_reconstruction_step_algorithm(self, value):
+        self.__change_combobox_step_algorithm(self.reconstruction_combobox, value)
+
+    def __change_bundle_adjustment_step_algorithm(self, value):
+        self.__change_combobox_step_algorithm(self.bundle_adjustment_combobox, value)
+
+    def __get_step_comboboxes_list(self):
+        return [self.feature_extraction_combobox,
+                self.feature_matching_combobox,
+                self.reconstruction_combobox,
+                self.bundle_adjustment_combobox]
+
+    @staticmethod
+    def __change_table_cols_number(table, new_count_of_cols):
+        num_of_cols = table.columnCount()
+        if new_count_of_cols < num_of_cols:
+            delta = num_of_cols - new_count_of_cols
+            for _ in range(delta):
+                last_column_index = table.columnCount() - 1
+                table.removeColumn(last_column_index)
+        elif new_count_of_cols > num_of_cols:
+            delta = new_count_of_cols - num_of_cols
+            table.setColumnCount(new_count_of_cols)
+            for j_delta in range(delta):
+                for i in range(table.rowCount()):
+                    table.setItem(i, num_of_cols + j_delta,
+                                  MainWindow.__create_empty_table_cell())
+
+    @staticmethod
+    def __narrow_table_if_needed(table):
+        is_last_column_empty = True
+        while is_last_column_empty:
+            last_column_index = table.columnCount() - 1
+            count_of_empty_rows = 0
+            row_count = table.rowCount()
+            for i in range(row_count):
+                cell_text = table.item(i, last_column_index).text()
+                if not cell_text:
+                    count_of_empty_rows += 1
+            if count_of_empty_rows == row_count:
+                table.removeColumn(last_column_index)
+            else:
+                is_last_column_empty = False
+
+    @staticmethod
+    def __get_step_line(table, step_name):
+        for i in range(0, table.rowCount(), 2):
+            print(table.item(i, 0).text())
+            if table.item(i, 0).text() == step_name:
+                return i
+        return None
+
+    def __change_step_default_params(self, step_name, algorithm_name, step_params):
+        step_row = self.__get_step_line(self.algorithm_parameters_table, step_name)
+        num_of_cols = self.algorithm_parameters_table.columnCount()
+        algorithm_params = list(step_params)
+        print("step_row", step_row)
+        self.algorithm_parameters_table.setItem(step_row, 1,
+                                                self.__create_table_item(algorithm_name, False))
+
+        for j in range(2, num_of_cols):
+            if j - 2 >= len(step_params):
+                item_1 = self.__create_empty_table_cell()
+                item_2 = self.__create_empty_table_cell()
+            else:
+                item_1 = self.__create_table_item(algorithm_params[j - 2], False)
+                item_2 = self.__create_table_item(step_params[algorithm_params[j - 2]])
+            self.algorithm_parameters_table.setItem(step_row, j, item_1)
+            self.algorithm_parameters_table.setItem(step_row + 1, j, item_2)
+
+    def __refill_step_in_algorithm_table(self, step_name, algorithm_name):
+        step_default_params = self.main_controller.get_step_algorithm_default_params(step_name, algorithm_name)
+        # if number of params is higher than num of cols
+        if len(step_default_params) + 2 > self.algorithm_parameters_table.columnCount():
+            new_num_of_cols = len(step_default_params) + 2
+            self.__change_table_cols_number(self.algorithm_parameters_table, new_num_of_cols)
+        self.__change_step_default_params(step_name, algorithm_name, step_default_params)
+        self.__narrow_table_if_needed(self.algorithm_parameters_table)
+
     def __fill_algorithm_table(self):
-        step_comboboxes = [self.feature_extraction_combobox,
-                           self.feature_matching_combobox,
-                           self.reconstruction_combobox,
-                           self.bundle_adjustment_combobox]
+        step_comboboxes = self.__get_step_comboboxes_list()
         all_steps_params = []
         for step_combobox in step_comboboxes:
             all_steps_params.append(
@@ -173,10 +263,7 @@ class MainWindow(QMainWindow):
                 self.algorithm_parameters_table.setItem(i * 2 + 1, j, item_2)
 
     def __set_default_algorithms(self):
-        comboboxes = [self.feature_extraction_combobox,
-                      self.feature_matching_combobox,
-                      self.reconstruction_combobox,
-                      self.bundle_adjustment_combobox]
+        comboboxes = self.__get_step_comboboxes_list()
 
         for combobox in comboboxes:
             default_algorithm = combobox.default_algorithm
@@ -360,12 +447,6 @@ class MainWindow(QMainWindow):
         pass
 
     def change_order_in_image_table(self):
-        pass
-
-    def init_combobox(self):
-        pass
-
-    def set_default_algorithm(self):
         pass
 
     # error window
