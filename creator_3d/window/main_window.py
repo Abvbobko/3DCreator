@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication,
 from PyQt5.QtCore import (Qt, QRegExp, QDate)
 import cv2
 import os
+import re
 import creator_3d.window.constants.const as window_const
 from creator_3d.controllers.main_controller import MainController
 
@@ -101,6 +102,85 @@ class MainWindow(QMainWindow):
 
         # algorithm params setting
         self.__fill_algorithm_table()
+
+        self.process_images_button.clicked.connect(self.__process_button_click)
+
+    @staticmethod
+    def __is_match_pattern(pattern, text):
+        matched = re.match(pattern, text)
+        return bool(matched)
+
+    @staticmethod
+    def __change_field_name(field_name):
+        return f' "{field_name}" ' if field_name else " "
+
+    @staticmethod
+    def __string_validator(text, field_name=None, mask=None, min_length=None, max_length=None, can_be_empty=False):
+        field_name = MainWindow.__change_field_name(field_name)
+
+        if not text and not can_be_empty:
+            return f"The field{field_name}can't be empty."
+
+        if can_be_empty and len(text) == 0:
+            return None
+
+        if mask and not MainWindow.__is_match_pattern(mask, text):
+            return f"The field{field_name} is filled incorrectly."
+
+        if min_length and len(text) < min_length:
+            return f"The field{field_name}should be less than {min_length} chars."
+
+        if max_length and len(text) > max_length:
+            return f"The field{field_name}shouldn't be longer than {max_length} chars."
+        return None
+
+    @staticmethod
+    def __validate_string_edit(edit):
+        error = MainWindow.__string_validator(
+            text=edit.text(),
+            field_name=edit.field_name,
+            mask=edit.mask_regex,
+            max_length=edit.maxLength(),
+            can_be_empty=edit.can_be_empty
+        )
+        return error
+
+    @staticmethod
+    def __list_validation_call(field_list, validation_func):
+        for field in field_list:
+            error = validation_func(field)
+            if error:
+                return error
+        return None
+
+    def __validate_camera_params(self):
+        edits = self.__get_camera_edits()
+        error = self.__list_validation_call(edits, self.__validate_string_edit)
+        if error:
+            self.call_error_box(error_text=error)
+            return False
+        return True
+
+    def __get_camera_edits(self):
+        return [self.focal_length_edit,
+                self.sensor_width_edit,
+                self.sensor_height_edit,
+                self.image_width_edit,
+                self.image_height_edit]
+
+    def __process_button_click(self):
+        print("a")
+        if not self.__validate_camera_params():
+            print("b")
+            return
+        print("c")
+
+        # todo: validate algorithm params
+
+        # todo: get camera
+        # todo: send algorithm with params to reconstructor
+
+        # todo: run procession
 
     @staticmethod
     def __get_item_max_length(list_of_items):

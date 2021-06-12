@@ -60,7 +60,7 @@ SENSOR_WIDTH_EDIT_CONST = EditConstValue(field_name="sensor width",
                                          can_be_empty=False,
                                          mask_regex=r"\d+(\.\d{1,2})?")
 
-SENSOR_HEIGHT_EDIT_CONST = EditConstValue(field_name="sensor width",
+SENSOR_HEIGHT_EDIT_CONST = EditConstValue(field_name="sensor height",
                                           max_length=5,
                                           can_be_empty=False,
                                           mask_regex=r"\d+(\.\d{1,2})?")
