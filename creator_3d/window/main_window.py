@@ -97,48 +97,28 @@ class MainWindow(QMainWindow):
         # algorithm params setting
         self.__fill_algorithm_table()
 
-        # algo params filling todo remove
-        # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
-        #          "sigma"],
-        #         ["", "SIFT", str(0), str(3), str(0.04), str(10), str(1.6)],
-        #         ["Feature matching", "BF", "normType", "crossCheck", "MRT", "", ""],
-        #         ["", "BF", "NORM_L2", "FALSE", "0.7", "", ""],
-        #         ["Reconstruction", "Reconstructor", "E_prob", "E_threshold", "", "", ""],
-        #         ["", "Reconstructor", "0.999", "1", "", "", ""],
-        #         ["Bundle adjustment", "Bundle adjustment", "x_threshold", "y_threshold", "", "", ""],
-        #         ["", "Bundle adjustment", "0.5", "1", "", "", ""]]
-        # self.algorithm_parameters_table.setColumnCount(len(text[0]))
-        # self.algorithm_parameters_table.setRowCount(len(text))
-        # self.algorithm_parameters_table.setHorizontalHeaderLabels(['Step', 'Algorithm', 'param_1', 'param_2',
-        #                                                            'param_3',
-        #                                                            'param_4', 'param_5'])
-        #
-        # header = self.algorithm_parameters_table.horizontalHeader()
-        # header.setSectionResizeMode(0, QHeaderView.Stretch)
-        # for i in range(1, 7):
-        #     header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
-        #
-        # for i in range(len(text)):
-        #     for j in range(len(text[i])):
-        #         item = QTableWidgetItem(text[i][j])
-        #         self.algorithm_parameters_table.setItem(i, j, item)
-        # ------------------------------------------------------------------------
-        # test_text = ["text_1", "text_2", "text_3"]
-        # for i in range(len(test_text)):
-        #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
-        #
-
     @staticmethod
     def __get_item_max_length(list_of_items):
         if not list_of_items:
             raise Exception("list_of_items must have at least 1 item.")
-        max_len = 0
-        max_len_index = len(list_of_items[0])
+        max_len = len(list_of_items[0])
+        max_len_index = 0
         for i in range(1, len(list_of_items)):
             if len(list_of_items[i]) >= max_len:
                 max_len = len(list_of_items[i])
                 max_len_index = i
         return len(list_of_items[max_len_index])
+
+    @staticmethod
+    def __create_table_item(text, is_editable=True):
+        item = QTableWidgetItem(str(text))
+        if not is_editable:
+            item.setFlags(Qt.ItemIsEnabled)
+        return item
+
+    @staticmethod
+    def __create_empty_table_cell(is_editable=False):
+        return MainWindow.__create_table_item('', is_editable)
 
     def __fill_algorithm_table(self):
         step_comboboxes = [self.feature_extraction_combobox,
@@ -159,46 +139,36 @@ class MainWindow(QMainWindow):
         self.algorithm_parameters_table.setRowCount(2 * len(step_comboboxes))
         self.algorithm_parameters_table.setHorizontalHeaderLabels(header)
         table_header_obj = self.algorithm_parameters_table.horizontalHeader()
-        table_header_obj.setSectionResizeMode(0, QHeaderView.Stretch)
-        for i in range(1, len(header)):
+        for i in range(len(header)):
             table_header_obj.setSectionResizeMode(i, QHeaderView.ResizeToContents)
 
         # fill table
         for i in range(len(step_comboboxes)):
-            # todo: сделать все пустые клетки незаполняемыми
-            # todo: BFMatcher выводится без параметров
-            # todo: Добавить реконструкции и бандл адджастменту параметры
             # set step name
-            item = QTableWidgetItem(step_comboboxes[i].step_name)
-            item.setFlags(Qt.ItemIsEnabled)
-            self.algorithm_parameters_table.setItem(i * 2, 0, item)
+            self.algorithm_parameters_table.setItem(i * 2, 0,
+                                                    self.__create_table_item(step_comboboxes[i].step_name, False))
 
             # empty cell before step cell
-            item = QTableWidgetItem('')
-            item.setFlags(Qt.ItemIsEnabled)
-            self.algorithm_parameters_table.setItem(i * 2 + 1, 0, item)
+            self.algorithm_parameters_table.setItem(i * 2 + 1, 0,
+                                                    self.__create_empty_table_cell())
 
             # set algorithm name
-            item = QTableWidgetItem(str(step_comboboxes[i].currentText()))
-            item.setFlags(Qt.ItemIsEnabled)
-            self.algorithm_parameters_table.setItem(i * 2, 1, item)
+            self.algorithm_parameters_table.setItem(i * 2, 1,
+                                                    self.__create_table_item(step_comboboxes[i].currentText(), False))
 
             # empty cell before algorithm name cell
-            item = QTableWidgetItem('')
-            item.setFlags(Qt.ItemIsEnabled)
-            self.algorithm_parameters_table.setItem(i * 2 + 1, 1, item)
+            self.algorithm_parameters_table.setItem(i * 2 + 1, 1,
+                                                    self.__create_empty_table_cell())
 
             # set params
             algorithm_params = list(all_steps_params[i])
             for j in range(2, num_of_cols):
-                if j >= len(algorithm_params):
-                    item = QTableWidgetItem('')
-                    item.setFlags(Qt.ItemIsEnabled)
-                    item_1, item_2 = item, item
+                if j-2 >= len(algorithm_params):
+                    item_1 = self.__create_empty_table_cell()
+                    item_2 = self.__create_empty_table_cell()
                 else:
-                    item_1 = QTableWidgetItem(str(algorithm_params[j]))
-                    item_1.setFlags(Qt.ItemIsEnabled)
-                    item_2 = QTableWidgetItem(str(all_steps_params[i][algorithm_params[j]]))
+                    item_1 = self.__create_table_item(algorithm_params[j-2], False)
+                    item_2 = self.__create_table_item(all_steps_params[i][algorithm_params[j-2]])
                 self.algorithm_parameters_table.setItem(i * 2, j, item_1)
                 self.algorithm_parameters_table.setItem(i * 2 + 1, j, item_2)
 
