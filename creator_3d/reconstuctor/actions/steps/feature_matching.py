@@ -10,7 +10,8 @@ from creator_3d.reconstuctor.constants import pipeline_const
 
 class BFMatcher(actions.Match):
 
-    __default_params = default_params.BF_DEFAULT_PARAMS.params
+    _default_params = default_params.BF_DEFAULT_PARAMS.params
+    _name = default_params.BF_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -31,13 +32,11 @@ class BFMatcher(actions.Match):
     def __get_bf_object(params_dict):
         return cv2.BFMatcher(**params_dict)
 
-    def __str__(self):
-        return default_params.BF_DEFAULT_PARAMS.name
-
 
 class FLANNMatcher(actions.Match):
 
-    __default_params = default_params.FLANN_DEFAULT_PARAMS.params
+    _default_params = default_params.FLANN_DEFAULT_PARAMS.params
+    _name = default_params.FLANN_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -57,6 +56,3 @@ class FLANNMatcher(actions.Match):
     @staticmethod
     def __get_flann_object(params_dict):
         return cv2.FlannBasedMatcher(**params_dict)
-
-    def __str__(self):
-        return default_params.FLANN_DEFAULT_PARAMS.name

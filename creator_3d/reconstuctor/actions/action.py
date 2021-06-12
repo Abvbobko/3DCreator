@@ -6,24 +6,25 @@ logger = logging.getLogger(__name__)
 
 class Action(ABC):
 
-    __default_params = {}
+    _default_params = {}
+    _name = None
 
     @abstractmethod
     def __init__(self, **params):
         pass
 
-    @property
-    def get_default_params(self):
+    @classmethod
+    def get_default_params(cls):
         """Get default action parameters."""
-        return self.__default_params.copy()
+        return cls._default_params.copy()
 
     def get_default_param_by_name(self, param_name):
         """Get default param value by name"""
-        return self.__default_params.get(param_name)
+        return self._default_params.get(param_name)
 
     def get_param_names(self):
         """Get list of all parameter names."""
-        return list(self.__default_params.keys())
+        return list(self._default_params.keys())
 
     def __generate_params_dict(self, **kwargs):
         """Get params for algorithm from kwargs"""
@@ -34,9 +35,9 @@ class Action(ABC):
                 result_param_dict[param] = kwargs.get(param)
         return result_param_dict
 
-    @abstractmethod
-    def __str__(self):
-        pass
+    @classmethod
+    def name(cls):
+        return cls._name
 
 
 class Extract(Action, ABC):

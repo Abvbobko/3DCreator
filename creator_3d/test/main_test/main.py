@@ -15,6 +15,7 @@ def extract_features(image_names):
     descriptor_for_all = []
     colors_for_all = []
     for image_name in image_names:
+        print(image_name)
         image = cv2.imread(image_name)
 
         if image is None:

@@ -6,7 +6,8 @@ from creator_3d.reconstuctor.constants import algorithm_default_params as defaul
 
 class Reconstructor(actions.Reconstruct):
 
-    __default_params = default_params.RECONSTRUCT_DEFAULT_PARAMS.params
+    _default_params = default_params.RECONSTRUCT_DEFAULT_PARAMS.params
+    _name = default_params.RECONSTRUCT_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,6 +37,3 @@ class Reconstructor(actions.Reconstruct):
             structure.append([col[0], col[1], col[2]])
 
         return np.array(structure)
-
-    def __str__(self):
-        return default_params.RECONSTRUCT_DEFAULT_PARAMS.name

@@ -49,3 +49,6 @@ class MainController:
 
     def get_bundle_adjust_step_name(self):
         return self.reconstructor.get_bundle_adjust_step_name()
+
+    def get_step_algorithm_default_params(self, step_name, algorithm_name=''):
+        return self.reconstructor.get_step_algorithm_default_params(step_name, algorithm_name)

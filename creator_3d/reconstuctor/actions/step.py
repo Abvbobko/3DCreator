@@ -20,13 +20,13 @@ class Step:
     def is_algorithm_belongs_to_step(self, algorithm_name: str):
         """Check if algorithm belongs to step algorithms or not"""
         for algorithm in self.step_algorithms:
-            if algorithm_name == str(algorithm):
+            if algorithm_name == algorithm:
                 return True
         return False
 
     def get_algorithm_class_by_name(self, algorithm_name: str):
-        for algorithm in self.step_algorithms:
-            if algorithm_name == str(algorithm):
+        for algorithm in self.get_step_algorithm_classes():
+            if algorithm_name == algorithm.name():
                 return algorithm
         return None
 
@@ -41,6 +41,11 @@ class Step:
         """Get all algorithms of step"""
         algorithms = inspect.getmembers(sys.modules[self.module.__name__], inspect.isclass)
         return [class_name for class_name, _ in algorithms]
+
+    def get_step_algorithm_classes(self):
+        """Get all algorithms of step"""
+        algorithms = inspect.getmembers(sys.modules[self.module.__name__], inspect.isclass)
+        return [cls for _, cls in algorithms]
 
     def get_default_step_algorithm_name(self):
         """Get default algorithm name of the step"""

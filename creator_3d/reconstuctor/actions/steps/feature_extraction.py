@@ -6,7 +6,8 @@ import cv2
 class SIFT(actions.Extract):
 
     # todo: think about default params and generalize logic?
-    __default_params = default_params.SIFT_DEFAULT_PARAMS.params
+    _default_params = default_params.SIFT_DEFAULT_PARAMS.params
+    _name = default_params.SIFT_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         """
@@ -28,12 +29,10 @@ class SIFT(actions.Extract):
         """Find key points and descriptors"""
         return self.sift.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
-    def __str__(self):
-        return default_params.SIFT_DEFAULT_PARAMS.name
-
 
 class SURF(actions.Extract):
-    __default_params = default_params.SURF_DEFAULT_PARAMS.params
+    _default_params = default_params.SURF_DEFAULT_PARAMS.params
+    _name = default_params.SURF_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         """
@@ -56,12 +55,10 @@ class SURF(actions.Extract):
         """Find key points and descriptors"""
         return self.surf.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
 
-    def __str__(self):
-        return default_params.SURF_DEFAULT_PARAMS.name
-
 
 class ORB(actions.Extract):
-    __default_params = default_params.ORB_DEFAULT_PARAMS.params
+    _default_params = default_params.ORB_DEFAULT_PARAMS.params
+    _name = default_params.ORB_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         """
@@ -82,8 +79,5 @@ class ORB(actions.Extract):
     def detect_and_compute(self, image, mask=None):
         """Find key points and descriptors"""
         return self.orb.detectAndCompute(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), mask)
-
-    def __str__(self):
-        return default_params.ORB_DEFAULT_PARAMS.name
 
 

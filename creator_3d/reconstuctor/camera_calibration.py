@@ -48,7 +48,7 @@ class Camera:
 
     @property
     def K(self):
-        if self.__intrinsic_matrix:
+        if self.__intrinsic_matrix is not None:
             return self.__intrinsic_matrix
         if self.__is_all_params_filled():
             return self.__create_intrinsic_matrix(f_mm=self.__focal_length,

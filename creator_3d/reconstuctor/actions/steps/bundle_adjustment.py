@@ -7,7 +7,8 @@ import numpy as np
 
 class BundleAdjuster(actions.BundleAdjustment):
 
-    __default_params = default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.params
+    _default_params = default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.params
+    _name = default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.name
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -45,6 +46,3 @@ class BundleAdjuster(actions.BundleAdjustment):
                 structure[point3d_id] = new_point
 
         return structure
-
-    def __str__(self):
-        return default_params.BUNDLE_ADJUSTMENT_DEFAULT_PARAMS.name

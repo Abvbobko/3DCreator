@@ -48,7 +48,7 @@ BF_DEFAULT_PARAMS = AlgorithmDefaultParams("BFMatcher", {"normType": cv2.NORM_L2
 
 
 # reconstruction
-RECONSTRUCT_DEFAULT_PARAMS = AlgorithmDefaultParams("Reconstruct", {})
+RECONSTRUCT_DEFAULT_PARAMS = AlgorithmDefaultParams("Reconstructor", {})
 
 # bundle adjustment
-BUNDLE_ADJUSTMENT_DEFAULT_PARAMS = AlgorithmDefaultParams("Bundle adjust", {})
+BUNDLE_ADJUSTMENT_DEFAULT_PARAMS = AlgorithmDefaultParams("BundleAdjuster", {})

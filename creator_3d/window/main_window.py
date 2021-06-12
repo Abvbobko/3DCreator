@@ -94,6 +94,9 @@ class MainWindow(QMainWindow):
 
         self.set_default_algorithms_button.clicked.connect(self.__set_default_algorithms)
 
+        # algorithm params setting
+        self.__fill_algorithm_table()
+
         # algo params filling todo remove
         # text = [["Feature extraction", "SIFT", "nfeatures", "nOctaveLayers", "contrastThreshold", "edgeThreshold",
         #          "sigma"],
@@ -119,11 +122,85 @@ class MainWindow(QMainWindow):
         #     for j in range(len(text[i])):
         #         item = QTableWidgetItem(text[i][j])
         #         self.algorithm_parameters_table.setItem(i, j, item)
-
+        # ------------------------------------------------------------------------
         # test_text = ["text_1", "text_2", "text_3"]
         # for i in range(len(test_text)):
         #     # item.setFlags(item.flags() | Qt.ItemIsSelectable)
         #
+
+    @staticmethod
+    def __get_item_max_length(list_of_items):
+        if not list_of_items:
+            raise Exception("list_of_items must have at least 1 item.")
+        max_len = 0
+        max_len_index = len(list_of_items[0])
+        for i in range(1, len(list_of_items)):
+            if len(list_of_items[i]) >= max_len:
+                max_len = len(list_of_items[i])
+                max_len_index = i
+        return len(list_of_items[max_len_index])
+
+    def __fill_algorithm_table(self):
+        step_comboboxes = [self.feature_extraction_combobox,
+                           self.feature_matching_combobox,
+                           self.reconstruction_combobox,
+                           self.bundle_adjustment_combobox]
+        all_steps_params = []
+        for step_combobox in step_comboboxes:
+            all_steps_params.append(
+                self.main_controller.get_step_algorithm_default_params(step_combobox.step_name,
+                                                                       str(step_combobox.currentText()))
+            )
+        # set number of col, rows and header of the table
+        num_of_cols = self.__get_item_max_length(all_steps_params)
+        header = ['Step', 'Algorithm'] + [f"param_{i}" for i in range(num_of_cols)]
+        num_of_cols = len(header)
+        self.algorithm_parameters_table.setColumnCount(num_of_cols)
+        self.algorithm_parameters_table.setRowCount(2 * len(step_comboboxes))
+        self.algorithm_parameters_table.setHorizontalHeaderLabels(header)
+        table_header_obj = self.algorithm_parameters_table.horizontalHeader()
+        table_header_obj.setSectionResizeMode(0, QHeaderView.Stretch)
+        for i in range(1, len(header)):
+            table_header_obj.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+
+        # fill table
+        for i in range(len(step_comboboxes)):
+            # todo: сделать все пустые клетки незаполняемыми
+            # todo: BFMatcher выводится без параметров
+            # todo: Добавить реконструкции и бандл адджастменту параметры
+            # set step name
+            item = QTableWidgetItem(step_comboboxes[i].step_name)
+            item.setFlags(Qt.ItemIsEnabled)
+            self.algorithm_parameters_table.setItem(i * 2, 0, item)
+
+            # empty cell before step cell
+            item = QTableWidgetItem('')
+            item.setFlags(Qt.ItemIsEnabled)
+            self.algorithm_parameters_table.setItem(i * 2 + 1, 0, item)
+
+            # set algorithm name
+            item = QTableWidgetItem(str(step_comboboxes[i].currentText()))
+            item.setFlags(Qt.ItemIsEnabled)
+            self.algorithm_parameters_table.setItem(i * 2, 1, item)
+
+            # empty cell before algorithm name cell
+            item = QTableWidgetItem('')
+            item.setFlags(Qt.ItemIsEnabled)
+            self.algorithm_parameters_table.setItem(i * 2 + 1, 1, item)
+
+            # set params
+            algorithm_params = list(all_steps_params[i])
+            for j in range(2, num_of_cols):
+                if j >= len(algorithm_params):
+                    item = QTableWidgetItem('')
+                    item.setFlags(Qt.ItemIsEnabled)
+                    item_1, item_2 = item, item
+                else:
+                    item_1 = QTableWidgetItem(str(algorithm_params[j]))
+                    item_1.setFlags(Qt.ItemIsEnabled)
+                    item_2 = QTableWidgetItem(str(all_steps_params[i][algorithm_params[j]]))
+                self.algorithm_parameters_table.setItem(i * 2, j, item_1)
+                self.algorithm_parameters_table.setItem(i * 2 + 1, j, item_2)
 
     def __set_default_algorithms(self):
         comboboxes = [self.feature_extraction_combobox,
