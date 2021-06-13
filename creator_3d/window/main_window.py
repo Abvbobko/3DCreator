@@ -1,15 +1,12 @@
 from PyQt5 import QtGui, uic
-from PyQt5.QtWidgets import (QApplication,
-                             QMainWindow,
+from PyQt5.QtWidgets import (QMainWindow,
                              QMessageBox,
                              QTableWidgetItem,
-                             QAbstractItemView,
                              QPushButton,
                              QHeaderView,
                              QFileDialog,
                              qApp)
-from PyQt5.QtCore import (Qt, QRegExp, QDate)
-import cv2
+from PyQt5.QtCore import (Qt, QRegExp)
 import os
 import re
 import creator_3d.window.constants.const as window_const
@@ -168,14 +165,28 @@ class MainWindow(QMainWindow):
                 self.image_width_edit,
                 self.image_height_edit]
 
-    def __process_button_click(self):
-        print("a")
-        if not self.__validate_camera_params():
-            print("b")
-            return
-        print("c")
+    def __validate_algorithm_params(self):
+        for i in range(0, self.algorithm_parameters_table.rowCount(), 2):
+            step_name = self.algorithm_parameters_table.item(i, 0).text()
+            algorithm_name = self.algorithm_parameters_table.item(i, 1).text()
+            params = {}
+            for j in range(2, self.algorithm_parameters_table.columnCount()):
+                param_name = self.algorithm_parameters_table.item(i, j).text()
+                if not param_name:
+                    break
+                params[param_name] = self.algorithm_parameters_table.item(i + 1, j).text()
+            error = self.main_controller.validate_algorithm_params(step_name, algorithm_name, **params)
+            if error:
+                self.call_error_box(error_text=error)
+                return False
+        return True
 
-        # todo: validate algorithm params
+    def __process_button_click(self):
+        if not self.__validate_camera_params():
+            return
+
+        if not self.__validate_algorithm_params():
+            return
 
         # todo: get camera
         # todo: send algorithm with params to reconstructor
@@ -342,16 +353,25 @@ class MainWindow(QMainWindow):
                 self.algorithm_parameters_table.setItem(i * 2, j, item_1)
                 self.algorithm_parameters_table.setItem(i * 2 + 1, j, item_2)
 
+    def __get_combobox_by_step_name(self, step_name):
+        comboboxes = self.__get_step_comboboxes_list()
+        for combobox in comboboxes:
+            if combobox.step_name == step_name:
+                return combobox
+        return None
+
     def __set_default_algorithms(self):
         comboboxes = self.__get_step_comboboxes_list()
 
         for combobox in comboboxes:
             default_algorithm = combobox.default_algorithm
             if default_algorithm:
+                if default_algorithm == combobox.currentText():
+                    self.__refill_step_in_algorithm_table(combobox.step_name, combobox.currentText())
+                    continue
                 index = combobox.findText(default_algorithm)
                 if index >= 0:
                     combobox.setCurrentIndex(index)
-        # todo: add default params of algorithm setting
 
     def __set_combobox(self, combobox, step_name, default_algorithm=''):
         combobox.step_name = step_name

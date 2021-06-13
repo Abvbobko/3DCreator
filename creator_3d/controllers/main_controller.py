@@ -52,3 +52,6 @@ class MainController:
 
     def get_step_algorithm_default_params(self, step_name, algorithm_name=''):
         return self.reconstructor.get_step_algorithm_default_params(step_name, algorithm_name)
+
+    def validate_algorithm_params(self, step_name, algorithm_name, **algorithm_params):
+        return self.reconstructor.validate_step_algorithm_params(step_name, algorithm_name, **algorithm_params)

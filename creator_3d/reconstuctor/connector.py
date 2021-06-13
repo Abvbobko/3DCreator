@@ -94,3 +94,6 @@ class ReconstructorConnector:
         if algorithm_class:
             return algorithm_class.get_default_params()
         return {}
+
+    def validate_step_algorithm_params(self, step_name, algorithm_name, **params):
+        return self.action_controller.validate_step_algorithm_params(step_name, algorithm_name, **params)

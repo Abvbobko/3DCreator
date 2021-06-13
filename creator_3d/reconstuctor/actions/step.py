@@ -63,5 +63,9 @@ class Step:
 
         return algorithm.get_default_params()
 
+    def validate_algorithm_params(self, algorithm_name, **params):
+        algorithm_class = self.get_algorithm_class_by_name(algorithm_name)
+        return algorithm_class.validate_params(**params)
+
     def __str__(self):
         return self.name

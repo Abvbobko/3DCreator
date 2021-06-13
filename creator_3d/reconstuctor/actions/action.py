@@ -5,13 +5,33 @@ logger = logging.getLogger(__name__)
 
 
 class Action(ABC):
-
     _default_params = {}
     _name = None
 
     @abstractmethod
     def __init__(self, **params):
         pass
+
+    @staticmethod
+    def convert_type(value, new_type):
+        return new_type(value)
+
+    @classmethod
+    def validate_params(cls, **params):
+        for param_name in cls._default_params:
+            if param_name not in params:
+                return f"Parameter {param_name} is not set ({cls.name()})."
+
+            default_type = type(cls._default_params[param_name])
+            if not isinstance(params[param_name], default_type):
+                try:
+                    default_type(params[param_name])
+                except ValueError:
+                    return f"Type of {param_name} should be {type(cls._default_params[param_name])} ({cls.name()})."
+            if default_type is bool and (isinstance(params[param_name], str)
+                                         and params[param_name].lower() not in ["false", "true", "t", "f", "0", "1"]):
+                return f"Type of {param_name} should be {type(cls._default_params[param_name])} ({cls.name()})."
+        return None
 
     @classmethod
     def get_default_params(cls):

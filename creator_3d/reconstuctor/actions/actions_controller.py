@@ -61,6 +61,9 @@ class ActionController:
         """Get all algorithms of the step"""
         return step.get_step_algorithms()
 
+    def validate_step_algorithm_params(self, step_name, algorithm_name, **params):
+        return self.get_step_by_name(step_name).validate_algorithm_params(algorithm_name, **params)
+
     def get_step_by_name(self, step_name):
         """Get step object by name
 
