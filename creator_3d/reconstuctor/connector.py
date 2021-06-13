@@ -12,14 +12,13 @@ class ReconstructorConnector:
     action_controller = ActionController()
     data_controller = DataController()
     camera_calibrator = Calibrator()
+    kernel = Kernel()
 
     def __init__(self):
         self.extractor = self.get_step_by_name(steps_const.EXTRACT_DEFAULT_PARAMS.name)
         self.matcher = self.get_step_by_name(steps_const.MATCH_DEFAULT_PARAMS.name)
         self.reconstructor = self.get_step_by_name(steps_const.RECONSTRUCT_DEFAULT_PARAMS.name)
         self.bundle_adjuster = self.get_step_by_name(steps_const.BUNDLE_ADJUST_DEFAULT_PARAMS.name)
-        # self.camera = None
-        self.kernel = Kernel()
 
     def get_step_by_name(self, step_name):
         return self.action_controller.get_step_by_name(step_name)
@@ -105,3 +104,16 @@ class ReconstructorConnector:
 
     def wrap_step_algorithm_params(self, step_name, algorithm_name, params):
         return self.action_controller.wrap_step_params(step_name, algorithm_name, params)
+
+    def process(self, camera, step_algorithms, image_dir, image_names):
+        return self.kernel.run_pipeline(image_dir=image_dir,
+                                        image_names=image_names,
+                                        camera=camera,
+                                        extract_step=self.extractor,
+                                        extract_algorithm_params=step_algorithms[str(self.extractor)],
+                                        match_step=self.matcher,
+                                        match_algorithm_params=step_algorithms[str(self.matcher)],
+                                        reconstruct_step=self.reconstructor,
+                                        reconstruct_algorithm_params=step_algorithms[str(self.reconstructor)],
+                                        bundle_adjust_step=self.bundle_adjuster,
+                                        bundle_adjust_algorithm_params=step_algorithms[str(self.bundle_adjuster)])

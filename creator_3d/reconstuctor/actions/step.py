@@ -50,10 +50,10 @@ class Step:
         return None
 
     def get_algorithm_object(self, algorithm_name: str, **params):
-        # todo: think maybe we should delete ** everywhere
         algorithm_class = self.get_algorithm_class_by_name(algorithm_name)
         if algorithm_class:
-            return algorithm_class(**params)
+            algorithm_params = algorithm_class.convert_params_type_from_str(**params)
+            return algorithm_class(algorithm_params)
         return None
 
     def get_step_algorithms(self):

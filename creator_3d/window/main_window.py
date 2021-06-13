@@ -237,7 +237,18 @@ class MainWindow(QMainWindow):
         steps = self.__get_step_algorithms()
         image_paths = self.__get_image_names()
         image_dir = self.__get_image_dir()
-        # todo: run pipeline
+        model = self.main_controller.process_images(camera=camera,
+                                                    step_algorithms=steps,
+                                                    image_dir=image_dir,
+                                                    image_names=image_paths)
+        if model.error:
+            self.call_error_box("Error", model.error)
+            return
+
+        if self.show_model_checkbox.isChecked():
+            # todo: show model
+            pass
+        # todo: call model saving (close dialog)
 
     @staticmethod
     def __get_item_max_length(list_of_items):

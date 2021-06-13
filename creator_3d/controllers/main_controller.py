@@ -63,3 +63,6 @@ class MainController:
 
     def wrap_step_algorithm_params(self, step_name, algorithm_name, params):
         return self.reconstructor.wrap_step_algorithm_params(step_name, algorithm_name, params)
+
+    def process_images(self, camera, step_algorithms, image_dir, image_names):
+        return self.reconstructor.process(camera, step_algorithms, image_dir, image_names)

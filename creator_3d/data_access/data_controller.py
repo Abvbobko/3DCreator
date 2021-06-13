@@ -13,6 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class DataController:
+
+    @staticmethod
+    def get_full_image_paths(image_dir, image_names):
+        return [os.path.join(image_dir, image_names)]
+
     @staticmethod
     def get_dir_content(path_to_dir):
         """Get list of dir content.
