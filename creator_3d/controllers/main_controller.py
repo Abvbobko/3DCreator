@@ -11,6 +11,11 @@ class MainController:
     def get_params_from_exif_image(self, image_path) -> Camera:
         return self.reconstructor.get_camera_params_from_exif(image_path)
 
+    def get_camera_object(self, focal_length, sensor_size, image_size):
+        return self.reconstructor.get_camera_object(focal_length=focal_length,
+                                                    sensor_size=sensor_size,
+                                                    image_size=image_size)
+
     def load_images_by_paths(self, image_paths):
         images = []
         for image_path in image_paths:
@@ -55,3 +60,6 @@ class MainController:
 
     def validate_algorithm_params(self, step_name, algorithm_name, **algorithm_params):
         return self.reconstructor.validate_step_algorithm_params(step_name, algorithm_name, **algorithm_params)
+
+    def wrap_step_algorithm_params(self, step_name, algorithm_name, params):
+        return self.reconstructor.wrap_step_algorithm_params(step_name, algorithm_name, params)

@@ -181,17 +181,63 @@ class MainWindow(QMainWindow):
                 return False
         return True
 
+    def __validate_image_table(self):
+        if self.image_table.rowCount() < 2:
+            error = "Image table must have at least 2 images."
+            self.call_error_box(error_text=error)
+            return False
+        return True
+
+    def __get_camera(self):
+        focal_length = float(self.focal_length_edit.text())
+        sensor_width = float(self.sensor_width_edit.text())
+        sensor_height = float(self.sensor_height_edit.text())
+        image_width = int(self.image_width_edit.text())
+        image_height = int(self.image_height_edit.text())
+        return self.main_controller.get_camera_object(focal_length=focal_length,
+                                                      sensor_size=(sensor_width, sensor_height),
+                                                      image_size=(image_width, image_height))
+
+    def __get_step_algorithms(self):
+        algorithm_params = {}
+        for i in range(0, self.algorithm_parameters_table.rowCount(), 2):
+            step_name = self.algorithm_parameters_table.item(i, 0).text()
+            algorithm_name = self.algorithm_parameters_table.item(i, 1).text()
+            params = {}
+            for j in range(2, self.algorithm_parameters_table.columnCount()):
+                param_name = self.algorithm_parameters_table.item(i, j).text()
+                param_value = self.algorithm_parameters_table.item(i+1, j).text()
+                if param_value == '':
+                    break
+                params[param_name] = param_value
+            algorithm_params[step_name] = self.main_controller.wrap_step_algorithm_params(step_name,
+                                                                                          algorithm_name,
+                                                                                          params)
+        return algorithm_params
+
+    def __get_image_names(self):
+        image_names = [None] * self.image_table.rowCount()
+        for i in range(self.image_table.rowCount()):
+            order = int(self.image_table.item(i, 0).text())
+            image_names[order] = self.image_table.item(i, 1).text()
+        return image_names
+
+    def __get_image_dir(self):
+        return self.path_to_image_files
+
     def __process_button_click(self):
-        if not self.__validate_camera_params():
-            return
+        validation_funcs = [self.__validate_image_table,
+                            self.__validate_camera_params,
+                            self.__validate_algorithm_params]
+        for validation_func in validation_funcs:
+            if not validation_func():
+                return
 
-        if not self.__validate_algorithm_params():
-            return
-
-        # todo: get camera
-        # todo: send algorithm with params to reconstructor
-
-        # todo: run procession
+        camera = self.__get_camera()
+        steps = self.__get_step_algorithms()
+        image_paths = self.__get_image_names()
+        image_dir = self.__get_image_dir()
+        # todo: run pipeline
 
     @staticmethod
     def __get_item_max_length(list_of_items):

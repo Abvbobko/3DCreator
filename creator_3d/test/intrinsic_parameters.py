@@ -11,11 +11,11 @@ rock_head_image = os.path.join(path_to_data, folder_name, image_name)
 
 calibrator = camera_calibration.Calibrator()
 
-book_dir = "book_test"
-book_image_name = "IMG_3426.JPG"
+book_dir = "university_small_34"
+book_image_name = "1.JPG"
 book_image_path = os.path.join(path_to_data, book_dir, book_image_name)
 image_size = DataController.read_pil_image(book_image_path).size
-CANON = camera_calibration.Camera(focal_length=33,
+CANON = camera_calibration.Camera(focal_length=34,
                                   sensor_width=22.3,
                                   sensor_height=14.9,
                                   image_width=image_size[0],

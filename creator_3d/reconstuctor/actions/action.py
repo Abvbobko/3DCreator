@@ -34,6 +34,23 @@ class Action(ABC):
         return None
 
     @classmethod
+    def convert_params_type_from_str(cls, **params):
+        new_params = {}
+        for param_name in cls._default_params:
+            default_type = type(cls._default_params[param_name])
+            if not isinstance(params[param_name], default_type):
+                converted_value = default_type(params[param_name])
+                new_params[param_name] = converted_value
+            else:
+                new_params[param_name] = params[param_name]
+
+            if default_type is bool and (isinstance(params[param_name], str)
+                                         and params[param_name].lower() in ["false", "true", "t", "f", "0", "1"]):
+                converted_value = default_type(params[param_name])
+                new_params[param_name] = converted_value
+        return new_params
+
+    @classmethod
     def get_default_params(cls):
         """Get default action parameters."""
         return cls._default_params.copy()

@@ -1,7 +1,7 @@
 from creator_3d.reconstuctor.actions.steps import feature_extraction, feature_matching, reconstruction, \
     bundle_adjustment
 
-from creator_3d.reconstuctor.actions.step import Step
+from creator_3d.reconstuctor.actions.step import Step, StepAlgorithmParamsWrapper
 from creator_3d.reconstuctor.constants import steps_default_params
 
 
@@ -81,3 +81,7 @@ class ActionController:
 
     def get_steps(self):
         return [str(step) for step in self.steps]
+
+    @staticmethod
+    def wrap_step_params(step_name, algorithm_name, params):
+        return StepAlgorithmParamsWrapper(step_name, algorithm_name, params)

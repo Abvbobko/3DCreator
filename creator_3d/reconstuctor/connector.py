@@ -53,6 +53,11 @@ class ReconstructorConnector:
         camera = self.camera_calibrator.get_camera_params_from_exif(image)
         return camera
 
+    def get_camera_object(self, focal_length, sensor_size, image_size):
+        return self.camera_calibrator.get_camera_object(focal_length=focal_length,
+                                                        sensor_size=sensor_size,
+                                                        image_size=image_size)
+
     @staticmethod
     def get_step_name(step: Step):
         return str(step)
@@ -97,3 +102,6 @@ class ReconstructorConnector:
 
     def validate_step_algorithm_params(self, step_name, algorithm_name, **params):
         return self.action_controller.validate_step_algorithm_params(step_name, algorithm_name, **params)
+
+    def wrap_step_algorithm_params(self, step_name, algorithm_name, params):
+        return self.action_controller.wrap_step_params(step_name, algorithm_name, params)

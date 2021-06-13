@@ -276,7 +276,7 @@ def mesh(point_cloud):
 def main():
     # get list of images from dir
     image_dir = const.image_dir
-    img_names = os.listdir(image_dir)
+    img_names = [f"{i}.JPG" for i in range(1, 9)]  # os.listdir(image_dir)
     # img_names = sorted(img_names)
 
     for i in range(len(img_names)):
@@ -301,6 +301,7 @@ def main():
         # function needs to be greater than 7,otherwise an error will be reported
         # Here do a repeat fill operation for the set of points less than 7,
         # that is, fill 7 with the first point in the set of points
+        print(object_points.size, image_points.size)
         if len(image_points) < 7:
             while len(image_points) < 7:
                 object_points = np.append(object_points, [object_points[0]], axis=0)

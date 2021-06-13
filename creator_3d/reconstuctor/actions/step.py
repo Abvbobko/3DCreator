@@ -4,6 +4,25 @@ import sys
 from creator_3d.reconstuctor.actions.action import Action
 
 
+class StepAlgorithmParamsWrapper:
+    def __init__(self, step_name, algorithm_name, params):
+        self.__step_name = step_name
+        self.__algorithm_name = algorithm_name
+        self.__params = params
+
+    @property
+    def step_name(self):
+        return self.__step_name
+
+    @property
+    def algorithm_name(self):
+        return self.__algorithm_name
+
+    @property
+    def params(self):
+        return self.__params
+
+
 class Step:
     def __init__(self, step_module, step_name, default_algorithm_name):
         self.module = step_module

@@ -2,7 +2,7 @@ import creator_3d.test.intrinsic_parameters as intrinsic
 import os
 
 image_dir_path = 'C:\\Users\\hp\\Desktop\\3DCreator\\data'
-dir_name = "book_test"
+dir_name = intrinsic.book_dir
 image_dir = os.path.join(image_dir_path, dir_name)
 MRT = 0.7
 

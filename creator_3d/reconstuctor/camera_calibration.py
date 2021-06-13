@@ -153,6 +153,15 @@ class Calibrator:
             result_dict[name] = exif_params[name] if name in exif_params else ''
         return result_dict
 
+    @staticmethod
+    def get_camera_object(focal_length, sensor_size, image_size, model=None):
+        return Camera(focal_length=focal_length,
+                      image_width=image_size[0],
+                      image_height=image_size[1],
+                      sensor_width=sensor_size[0],
+                      sensor_height=sensor_size[1],
+                      model=model)
+
     def get_camera_params_from_exif(self, image):
         im_w_param_name = camera_const.EXIF_PARAMS_NAME.image_width
         im_h_param_name = camera_const.EXIF_PARAMS_NAME.image_height
@@ -178,10 +187,7 @@ class Calibrator:
             params[model_param_name] = None
             params[sw_param_name], params[sh_param_name] = '', ''
 
-        return Camera(focal_length=params[focal_length_param_name],
-                      image_width=params[im_h_param_name],
-                      image_height=params[im_h_param_name],
-                      sensor_width=params[sw_param_name],
-                      sensor_height=params[sh_param_name],
-                      model=params[model_param_name])
-
+        return self.get_camera_object(focal_length=params[focal_length_param_name],
+                                      sensor_size=(params[sw_param_name], params[sh_param_name]),
+                                      image_size=(params[im_w_param_name], params[im_h_param_name]),
+                                      model=params[model_param_name])
