@@ -66,3 +66,6 @@ class MainController:
 
     def process_images(self, camera, step_algorithms, image_dir, image_names):
         return self.reconstructor.process(camera, step_algorithms, image_dir, image_names)
+
+    def get_save_method_by_ext(self, extension):
+        return self.data_accessor.get_save_method_by_extension(extension)

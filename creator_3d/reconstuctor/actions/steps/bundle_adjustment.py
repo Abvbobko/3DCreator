@@ -28,7 +28,7 @@ class BundleAdjuster(actions.BundleAdjustment):
         motions = params.get("motions")
         K = params.get("K")
         correspond_struct_idx = params.get("correspond_struct_idx")
-        key_points_for_all = params.get("key_points_for_all")
+        key_points_for_all = params.get("key_points")
         structure = params.get("structure")
 
         for i in range(len(rotations)):

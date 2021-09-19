@@ -53,7 +53,7 @@ class Step:
         algorithm_class = self.get_algorithm_class_by_name(algorithm_name)
         if algorithm_class:
             algorithm_params = algorithm_class.convert_params_type_from_str(**params)
-            return algorithm_class(algorithm_params)
+            return algorithm_class(**algorithm_params)
         return None
 
     def get_step_algorithms(self):

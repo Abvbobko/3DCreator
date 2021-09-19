@@ -252,7 +252,7 @@ def fig(structure, colors):
 
 def fig_v1(structure):
     print(structure.shape)
-    mlab.points3d(structure[:, 0], structure[:, 1], structure[:, 2], mode='point', name='dinosaur')
+    mlab.points3d(structure[:, 0], structure[:, 1], structure[:, 2], mode='point', name='3DCreator')
     mlab.show()
 
 
@@ -276,7 +276,7 @@ def mesh(point_cloud):
 def main():
     # get list of images from dir
     image_dir = const.image_dir
-    img_names = [f"{i}.JPG" for i in range(1, 9)]  # os.listdir(image_dir)
+    img_names = [f"{i}.JPG" for i in range(8, 0, -1)]  # os.listdir(image_dir)
     # img_names = sorted(img_names)
 
     for i in range(len(img_names)):

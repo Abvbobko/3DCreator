@@ -11,6 +11,7 @@ import os
 import re
 import creator_3d.window.constants.const as window_const
 from creator_3d.controllers.main_controller import MainController
+from mayavi import mlab
 
 
 class MainWindow(QMainWindow):
@@ -218,7 +219,7 @@ class MainWindow(QMainWindow):
     def __get_image_names(self):
         image_names = [None] * self.image_table.rowCount()
         for i in range(self.image_table.rowCount()):
-            order = int(self.image_table.item(i, 0).text())
+            order = int(self.image_table.item(i, 0).text()) - 1
             image_names[order] = self.image_table.item(i, 1).text()
         return image_names
 
@@ -237,18 +238,41 @@ class MainWindow(QMainWindow):
         steps = self.__get_step_algorithms()
         image_paths = self.__get_image_names()
         image_dir = self.__get_image_dir()
+
         model = self.main_controller.process_images(camera=camera,
                                                     step_algorithms=steps,
                                                     image_dir=image_dir,
-                                                    image_names=image_paths)
+                                                    image_names=image_paths[:3])
         if model.error:
             self.call_error_box("Error", model.error)
             return
 
         if self.show_model_checkbox.isChecked():
-            # todo: show model
-            pass
-        # todo: call model saving (close dialog)
+            self.__show_model(model.model)
+        self.__save_model_to_file(model.model)
+        self.progress_bar.setValue(0)
+
+    def __save_model_to_file(self, model):
+        file_dialog = QFileDialog()
+        # file_dialog.setDefaultSuffix(".csv")
+        # open_dialog.getOpenFileNames(self, title, directory, file_filter)
+        path, extension = file_dialog.getSaveFileName(self, 'Save File', '', "OBJ (*.obj);;PLY (*.ply)")
+        if extension == "OBJ (*.obj)":
+            extension = "obj"
+        elif extension == "PLY (*.ply)":
+            extension = "ply"
+        else:
+            raise Exception("Some error")
+
+        saving_method = self.main_controller.get_save_method_by_ext(extension)
+        saving_method(model, path)
+        self.call_ok_box("Ok", "Model is saved.")
+
+    @staticmethod
+    def __show_model(model):
+        print(model.shape)
+        mlab.points3d(model[:, 0], model[:, 1], model[:, 2], mode='point', name='model')
+        mlab.show()
 
     @staticmethod
     def __get_item_max_length(list_of_items):
@@ -519,7 +543,6 @@ class MainWindow(QMainWindow):
         return self.main_controller.get_params_from_exif_image(image_path)
 
     def __fill_camera_params_edits(self, camera):
-        # test: test when not all camera params are available
         self.focal_length_edit.setText(str(camera.focal_length))
         sensor_size = camera.sensor_size
         self.sensor_width_edit.setText(str(sensor_size[0]))
@@ -563,6 +586,7 @@ class MainWindow(QMainWindow):
             # insert order number
             order = str(i + 1)
             order_item = QTableWidgetItem(order)
+            order_item.setFlags(Qt.ItemIsEnabled)
             self.image_table.setItem(i, 0, order_item)
 
             # insert image name
@@ -574,8 +598,6 @@ class MainWindow(QMainWindow):
             remove_button_sell = QPushButton('X')
             remove_button_sell.clicked.connect(self.__remove_item_from_image_table)
             self.image_table.setCellWidget(i, 2, remove_button_sell)
-
-    # todo: add ограничения на ввод только чисел в номере
 
     def __remove_item_from_image_table(self):
         """Remove row of clicked button in image table"""
@@ -605,9 +627,3 @@ class MainWindow(QMainWindow):
 
     def change_order_in_image_table(self):
         pass
-
-    # error window
-    # message window
-    # show_model
-
-    # Todo: все числа между старым и новым уменьшатся на 1

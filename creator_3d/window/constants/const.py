@@ -15,7 +15,7 @@ class IMAGE_TABLE:
         return len(IMAGE_TABLE.table_header)
 
 
-IMAGES_FOR_PROCESS_DIALOG_TITLE = "Open image files"
+IMAGES_FOR_PROCESS_DIALOG_TITLE = "3DCreator"
 IMAGES_FOR_PROCESS_DIALOG_DIR = ".."
 IMAGES_FOR_PROCESS_DIALOG_FILE_FILTER = "JPEG (*.jpg;*.jpeg);;PNG (*.png);;TIFF (*.tiff)"
 

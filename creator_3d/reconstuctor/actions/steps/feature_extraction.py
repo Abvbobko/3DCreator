@@ -18,11 +18,11 @@ class SIFT(actions.Extract):
 
         # test: check super() with abstract init
         super().__init__(**kwargs)
-        params = self.__generate_params_dict(**kwargs)
+        params = self._generate_params_dict(**kwargs)
         self.sift = self.__get_sift_with_params(**params)
 
     @staticmethod
-    def __get_sift_with_params(params_dict):
+    def __get_sift_with_params(**params_dict):
         return cv2.SIFT_create(**params_dict)
 
     def detect_and_compute(self, image, mask=None):
@@ -43,11 +43,11 @@ class SURF(actions.Extract):
 
         super().__init__(**kwargs)
 
-        params = self.__generate_params_dict(**kwargs)
+        params = self._generate_params_dict(**kwargs)
         self.surf = self.__get_surf_object(**params)
 
     @staticmethod
-    def __get_surf_object(params_dict):
+    def __get_surf_object(**params_dict):
         # todo: check
         return cv2.SURF_create(**params_dict)
 
@@ -69,11 +69,11 @@ class ORB(actions.Extract):
 
         super().__init__(**kwargs)
 
-        params = self.__generate_params_dict(**kwargs)
+        params = self._generate_params_dict(**kwargs)
         self.orb = self.__get_orb_object(**params)
 
     @staticmethod
-    def __get_orb_object(params_dict):
+    def __get_orb_object(**params_dict):
         return cv2.ORB_create(**params_dict)
 
     def detect_and_compute(self, image, mask=None):

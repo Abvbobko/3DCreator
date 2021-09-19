@@ -16,10 +16,10 @@ class AlgorithmDefaultParams:
 
 
 # extraction
-SIFT_DEFAULT_PARAMS = AlgorithmDefaultParams("SIFT", {"n_features": 0,
-                                                      "n_octave_layers": 3,
-                                                      "contrast_threshold": 0.04,
-                                                      "edge_threshold": 10,
+SIFT_DEFAULT_PARAMS = AlgorithmDefaultParams("SIFT", {"nfeatures": 0,
+                                                      "nOctaveLayers": 3,
+                                                      "contrastThreshold": 0.04,
+                                                      "edgeThreshold": 10,
                                                       "sigma": 1.6})
 
 SURF_DEFAULT_PARAMS = AlgorithmDefaultParams("SURF", {"hessianThreshold": 100,

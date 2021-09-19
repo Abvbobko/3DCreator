@@ -358,7 +358,7 @@
      <string>Images:</string>
     </property>
    </widget>
-   <widget class="QProgressBar" name="progressBar">
+   <widget class="QProgressBar" name="progress_bar">
     <property name="geometry">
      <rect>
       <x>300</x>

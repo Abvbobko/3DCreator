@@ -63,7 +63,7 @@ class Action(ABC):
         """Get list of all parameter names."""
         return list(self._default_params.keys())
 
-    def __generate_params_dict(self, **kwargs):
+    def _generate_params_dict(self, **kwargs):
         """Get params for algorithm from kwargs"""
         params = self.get_param_names()
         result_param_dict = {}
@@ -95,6 +95,10 @@ class Reconstruct(Action, ABC):
     @abstractmethod
     def reconstruct(self, **params):
         """Reconstruct 3D points."""
+        pass
+
+    @abstractmethod
+    def find_transform(self, K, p1, p2):
         pass
 
 

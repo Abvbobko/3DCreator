@@ -15,7 +15,7 @@ class Reconstructor(actions.Reconstruct):
         self.e_prob = kwargs['E_prob']
         self.e_threshold = kwargs['E_threshold']
 
-    def __find_transform(self, K, p1, p2):
+    def find_transform(self, K, p1, p2):
         """Find rotation and transform matrices"""
 
         focal_length = self.scale * (K[0, 0] + K[1, 1])

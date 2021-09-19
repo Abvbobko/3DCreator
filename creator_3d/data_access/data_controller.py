@@ -15,8 +15,22 @@ logger = logging.getLogger(__name__)
 class DataController:
 
     @staticmethod
+    def get_extension_method_mapping():
+        return {
+        const.OBJ_EXTENSION: DataController.write_obj_file,
+        const.PLY_EXTENSION: DataController.write_ply_file
+    }
+
+    @staticmethod
+    def get_save_method_by_extension(extension):
+        mapping = DataController.get_extension_method_mapping()
+        if extension not in mapping:
+            raise Exception("aaa")
+        return mapping[extension]
+
+    @staticmethod
     def get_full_image_paths(image_dir, image_names):
-        return [os.path.join(image_dir, image_names)]
+        return [os.path.join(image_dir, image_name) for image_name in image_names]
 
     @staticmethod
     def get_dir_content(path_to_dir):
@@ -62,7 +76,7 @@ class DataController:
             os.mkdir(file_dir)
 
     @staticmethod
-    def write_obj_file(mesh_v, mesh_f, file_path):
+    def write_obj_file(mesh_v, file_path):
         """Write point cloud to .obj file
 
         Args:
@@ -71,12 +85,13 @@ class DataController:
             file_path (str): path to result file
         """
 
+        print("obj saving")
         with open(file_path, 'w') as obj_file:
             for v in mesh_v:
                 obj_file.write('v %f %f %f\n' % (v[0], v[1], v[2]))
-            if mesh_f is not None:
-                for f in mesh_f + 1:
-                    obj_file.write('f %d %d %d\n' % (f[0], f[1], f[2]))
+            # if mesh_f is not None:
+            #     for f in mesh_f + 1:
+            #         obj_file.write('f %d %d %d\n' % (f[0], f[1], f[2]))
 
     @staticmethod
     def write_ply_file(mesh_v, file_path):
@@ -87,6 +102,7 @@ class DataController:
             file_path (str): path to result file
         """
 
+        print("ply saving")
         with open(file_path, 'w') as ply_file:
             # Write header of .ply file
             ply_file.write('ply\n')

@@ -11,7 +11,7 @@ class Model:
 
     @property
     def error(self):
-        return self.error
+        return self.__error
 
     @property
     def model(self):

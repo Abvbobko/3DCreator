@@ -9,3 +9,7 @@ class CsvHeaderParamName:
     camera_model = 'CameraModel'
     sensor_width = 'SensorWidth(mm)'
     sensor_height = 'SensorHeight(mm)'
+
+
+OBJ_EXTENSION = "obj"
+PLY_EXTENSION = "ply"

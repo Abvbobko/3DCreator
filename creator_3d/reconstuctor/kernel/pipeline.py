@@ -6,7 +6,7 @@ import logging
 from creator_3d.reconstuctor.actions.action import Extract, Match, Reconstruct, BundleAdjustment
 from creator_3d.reconstuctor.camera_calibration import Camera
 
-logger = logging.getLogger(__name__)
+# logger = logging.get# logger(__name__)
 
 
 class Pipeline:
@@ -32,15 +32,14 @@ class Pipeline:
             (np.array): matrix with descriptors
         """
 
-        logger.info("Extract features")
+        # logger.info("Extract features")
         key_points_for_all = []
         descriptor_for_all = []
         image_number = 0
         for image_name in image_names:
-            logger.info("Extract from image #%s", image_number)
+            # logger.info("Extract from image #%s", image_number)
             image_number += 1
 
-            # todo: move
             image = cv2.imread(image_name)
 
             if image is None:
@@ -53,18 +52,18 @@ class Pipeline:
 
             key_points_for_all.append(key_points)
             descriptor_for_all.append(descriptor)
-        logger.info("Extraction is finished.")
+        # logger.info("Extraction is finished.")
         return np.array(key_points_for_all), np.array(descriptor_for_all)
 
     def __match_features(self, descriptors):
         """Match features between images"""
-        logger.info("Match features.")
+        # logger.info("Match features.")
         matches_for_all_images = []
         for i in range(len(descriptors) - 1):
-            logger.info("Match features for images %s - %s", i, i + 1)
+            # logger.info("Match features for images %s - %s", i, i + 1)
             matches = self.matcher.match_features(descriptors[i], descriptors[i + 1])
             matches_for_all_images.append(matches)
-        logger.info("Matching is finished.")
+        # logger.info("Matching is finished.")
         return np.array(matches_for_all_images)
 
     @staticmethod
@@ -88,7 +87,7 @@ class Pipeline:
         p1, p2 = self.__get_matched_points(key_points_for_all[0], key_points_for_all[1], matches_for_all[0])
 
         K = self.camera.K
-        transform = self.reconstructor.__find_transform(K, p1, p2)
+        transform = self.reconstructor.find_transform(K, p1, p2)
         if transform:
             R, T, mask = transform
         else:
@@ -158,10 +157,9 @@ class Pipeline:
             (np.array): result point cloud.
         """
 
-        # todo: think how to implement image loading
         key_points, descriptor = self.__extract_features(image_names)
         matches = self.__match_features(descriptor)
-        logger.info("Reconstruction")
+        # logger.info("Reconstruction")
         print("0 - 1")
         structure, correspond_struct_idx, rotations, motions = self.__init_structure(key_points,
                                                                                      matches)

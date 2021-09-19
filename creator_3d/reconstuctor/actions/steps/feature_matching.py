@@ -16,7 +16,7 @@ class BFMatcher(actions.Match):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        params = self.__generate_params_dict(**kwargs)
+        params = self._generate_params_dict(**kwargs)
         self.bf = self.__get_bf_object(**params)
 
     def match_features(self, query, train):
@@ -29,8 +29,8 @@ class BFMatcher(actions.Match):
         return np.array(matches)
 
     @staticmethod
-    def __get_bf_object(params_dict):
-        return cv2.BFMatcher(**params_dict)
+    def __get_bf_object(**params_dict):
+        return cv2.BFMatcher(cv2.NORM_L2)  # **params_dict)
 
 
 class FLANNMatcher(actions.Match):
@@ -41,7 +41,7 @@ class FLANNMatcher(actions.Match):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        params = self.__generate_params_dict(**kwargs)
+        params = self._generate_params_dict(**kwargs)
         self.flann = self.__get_flann_object(**params)
 
     def match_features(self, query, train):
@@ -54,5 +54,5 @@ class FLANNMatcher(actions.Match):
         return np.array(matches)
 
     @staticmethod
-    def __get_flann_object(params_dict):
+    def __get_flann_object(**params_dict):
         return cv2.FlannBasedMatcher(**params_dict)
